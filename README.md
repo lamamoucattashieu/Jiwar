@@ -70,8 +70,8 @@ _Documented in Sprint 1, together with the deployment pipeline._
 | Name | GitHub |
 |---|---|
 | Lama | [@lamamoucattashieu](https://github.com/lamamoucattashieu) |
-| Salma | TBD |
-| Adam | TBD |
-| Habib | TBD |
-| Issam | TBD |
-| Sanad | TBD |
+| Salma | [@snsourieu2024](https://github.com/snsourieu2024) |
+| Adam | [@adamkhouryedy2308-eng](https://github.com/adamkhouryedy2308-eng) |
+| Habib | [@habo212](https://github.com/habo212) |
+| Issam | [@issamarida](https://github.com/issamarida) |
+| Sanad | [@Sanad-AlBilleh](https://github.com/Sanad-AlBilleh) |
