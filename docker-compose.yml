@@ -1,0 +1,84 @@
+# Local system: docker compose up --build  (after cp .env.example .env)
+#   UI:       http://localhost:8080
+#   learning: http://localhost:3001/health
+#   projects: http://localhost:3002/health
+
+services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: ${MSSQL_SA_PASSWORD:?set it in .env}
+    volumes:
+      - sqldata:/var/opt/mssql
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -C -S localhost -U sa -P \"$$MSSQL_SA_PASSWORD\" -Q 'SELECT 1' -b -o /dev/null"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 20s
+
+  # One-off job: creates the two databases and their logins, then exits.
+  db-init:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+    environment:
+      MSSQL_SA_PASSWORD: ${MSSQL_SA_PASSWORD:?set it in .env}
+      LEARNING_DB_PASSWORD: ${LEARNING_DB_PASSWORD:?set it in .env}
+      PROJECTS_DB_PASSWORD: ${PROJECTS_DB_PASSWORD:?set it in .env}
+    volumes:
+      - ./db/init.sql:/init.sql:ro
+    entrypoint: ["/bin/sh", "-c", "/opt/mssql-tools18/bin/sqlcmd -C -S sqlserver -U sa -P \"$$MSSQL_SA_PASSWORD\" -b -i /init.sql"]
+    restart: "no"
+
+  learning:
+    build: ./services/learning
+    depends_on:
+      db-init:
+        condition: service_completed_successfully
+    environment:
+      PORT: 8000
+      CORS_ORIGIN: http://localhost:8080
+      DATABASE_URL: mssql://learning_user:${LEARNING_DB_PASSWORD}@sqlserver:1433/learning?encrypt=true&trustServerCertificate=true
+    ports:
+      - "3001:8000"
+
+  projects:
+    build: ./services/projects
+    depends_on:
+      db-init:
+        condition: service_completed_successfully
+    environment:
+      PORT: 8000
+      CORS_ORIGIN: http://localhost:8080
+      DATABASE_URL: mssql://projects_user:${PROJECTS_DB_PASSWORD}@sqlserver:1433/projects?encrypt=true&trustServerCertificate=true
+      LEARNING_URL: http://learning:8000
+    ports:
+      - "3002:8000"
+
+  # One-off job: builds the React UI into a volume (not a service container).
+  ui-build:
+    image: node:24.11.1-alpine
+    working_dir: /build
+    volumes:
+      - ./ui:/src:ro
+      - ui-dist:/dist
+    command: ["sh", "-c", "cp -r /src/. /build && rm -rf node_modules && npm ci && npx vite build --outDir /dist --emptyOutDir"]
+    restart: "no"
+
+  # Stock web server serving the built static files, as Static Web Apps does on Azure.
+  ui:
+    image: nginx:1.29-alpine
+    depends_on:
+      ui-build:
+        condition: service_completed_successfully
+    volumes:
+      - ui-dist:/usr/share/nginx/html:ro
+    ports:
+      - "8080:80"
+
+volumes:
+  sqldata:
+  ui-dist:
