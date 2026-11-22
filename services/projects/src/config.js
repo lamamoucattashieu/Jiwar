@@ -5,5 +5,6 @@ export function loadConfig(env = process.env) {
     port: Number(env.PORT ?? 8000),
     corsOrigin: env.CORS_ORIGIN ?? 'http://localhost:8080',
     version: env.GIT_SHA ?? 'dev',
+    databaseUrl: env.DATABASE_URL || undefined,
   };
 }

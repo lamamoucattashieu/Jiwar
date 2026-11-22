@@ -1,44 +1,81 @@
-import { useEffect, useState } from 'react';
+import { BrowserRouter, NavLink, Route, Routes } from 'react-router-dom';
+import { LanguageProvider, useLanguage } from './i18n.jsx';
+import { SessionProvider, useSession } from './session.jsx';
+import Home from './pages/Home.jsx';
+import Courses from './pages/Courses.jsx';
+import CourseDetail from './pages/CourseDetail.jsx';
+import CourseForm from './pages/CourseForm.jsx';
 
-const { LEARNING_URL, PROJECTS_URL } = window.JIWAR_CONFIG;
-
-const SERVICES = [
-  { name: 'Learning service', url: LEARNING_URL },
-  { name: 'Projects service', url: PROJECTS_URL },
+// Navigation per role. Each feature adds its links here with the roles that see them.
+const NAV = [
+  { to: '/', key: 'navHome', end: true },
+  { to: '/courses', key: 'navCourses' },
+  { to: '/teach', key: 'navTeach', roles: ['instructor'] },
 ];
 
-async function checkHealth(url) {
-  try {
-    const res = await fetch(`${url}/health`, { signal: AbortSignal.timeout(3000) });
-    const body = await res.json();
-    return res.ok ? `ok (version ${body.version})` : `unhealthy (HTTP ${res.status})`;
-  } catch {
-    return 'unreachable';
-  }
+function UserSwitcher() {
+  const { t } = useLanguage();
+  const { users, user, choose, error } = useSession();
+  return (
+    <label className="switcher">
+      <span>{t('actingAs')}</span>
+      <select value={user?.id ?? ''} onChange={(e) => choose(e.target.value)} title={error ?? undefined}>
+        <option value="">{t('visitor')}</option>
+        {users.map((u) => (
+          <option key={u.id} value={u.id}>
+            {u.name} ({u.roles.map((r) => t('roles')[r]).join(', ')})
+          </option>
+        ))}
+      </select>
+    </label>
+  );
+}
+
+function Layout() {
+  const { t, toggle } = useLanguage();
+  const { is } = useSession();
+  return (
+    <>
+      <header className="topbar">
+        <div className="topbar-inner">
+          <span className="brand">Jiwar</span>
+          <nav>
+            {NAV.filter((n) => !n.roles || is(...n.roles)).map((n) => (
+              <NavLink key={n.to} to={n.to} end={n.end}>
+                {t(n.key)}
+              </NavLink>
+            ))}
+          </nav>
+          <div className="topbar-tools">
+            <UserSwitcher />
+            <button type="button" className="link-button" onClick={toggle}>
+              {t('language')}
+            </button>
+          </div>
+        </div>
+      </header>
+      <main className="page">
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/courses" element={<Courses />} />
+          <Route path="/teach" element={<Courses mine />} />
+          <Route path="/courses/new" element={<CourseForm />} />
+          <Route path="/courses/:id" element={<CourseDetail />} />
+          <Route path="/courses/:id/edit" element={<CourseForm />} />
+        </Routes>
+      </main>
+    </>
+  );
 }
 
 export default function App() {
-  const [status, setStatus] = useState({});
-
-  useEffect(() => {
-    SERVICES.forEach(async ({ name, url }) => {
-      const result = await checkHealth(url);
-      setStatus((prev) => ({ ...prev, [name]: result }));
-    });
-  }, []);
-
   return (
-    <main style={{ fontFamily: 'system-ui, sans-serif', maxWidth: 640, margin: '2rem auto', padding: '0 1rem' }}>
-      <h1>Jiwar</h1>
-      <p>Coding and AI training for Palestinian refugee youth in Jordan, connected to paid projects from local businesses.</p>
-      <h2>System status</h2>
-      <ul>
-        {SERVICES.map(({ name }) => (
-          <li key={name}>
-            {name}: {status[name] ?? 'checking…'}
-          </li>
-        ))}
-      </ul>
-    </main>
+    <LanguageProvider>
+      <SessionProvider>
+        <BrowserRouter>
+          <Layout />
+        </BrowserRouter>
+      </SessionProvider>
+    </LanguageProvider>
   );
 }

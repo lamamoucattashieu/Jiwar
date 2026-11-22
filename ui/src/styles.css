@@ -1,0 +1,279 @@
+/* Mobile first: the base styles fit a 360 px screen; wider screens add room.
+   Logical properties (margin-inline, padding-inline) flip for Arabic automatically. */
+:root {
+  --ink: #1d2433;
+  --muted: #5d6677;
+  --line: #dfe3ea;
+  --bg: #f7f8fa;
+  --card: #ffffff;
+  --accent: #0f7b5f;
+  --accent-ink: #ffffff;
+  --danger: #b3261e;
+  --radius: 10px;
+  font-family: system-ui, 'Segoe UI', Tahoma, sans-serif;
+  color: var(--ink);
+  background: var(--bg);
+  line-height: 1.5;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+}
+
+a {
+  color: var(--accent);
+}
+
+h1 {
+  font-size: 1.5rem;
+  margin-block: 0.5rem 0.75rem;
+}
+
+h2 {
+  font-size: 1.15rem;
+  margin-block: 1.5rem 0.5rem;
+}
+
+.topbar {
+  background: var(--card);
+  border-block-end: 1px solid var(--line);
+}
+
+.topbar-inner {
+  max-width: 960px;
+  margin-inline: auto;
+  padding: 0.5rem 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 1rem;
+}
+
+.brand {
+  font-weight: 700;
+  color: var(--accent);
+  font-size: 1.15rem;
+}
+
+nav {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+nav a {
+  text-decoration: none;
+  color: var(--muted);
+  padding-block: 0.25rem;
+}
+
+nav a.active {
+  color: var(--ink);
+  font-weight: 600;
+  border-block-end: 2px solid var(--accent);
+}
+
+.topbar-tools {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-inline-start: auto;
+  flex-wrap: wrap;
+}
+
+.switcher {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.875rem;
+  color: var(--muted);
+}
+
+.switcher select {
+  max-width: 220px;
+}
+
+.page {
+  max-width: 960px;
+  margin-inline: auto;
+  padding: 1rem;
+}
+
+.lead {
+  font-size: 1.05rem;
+  color: var(--muted);
+}
+
+.muted {
+  color: var(--muted);
+}
+
+.page-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.cards {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 0.9rem 1rem;
+}
+
+.card-title {
+  font-weight: 600;
+  font-size: 1.05rem;
+  text-decoration: none;
+}
+
+.card p {
+  margin: 0.25rem 0 0;
+}
+
+.badge {
+  display: inline-block;
+  margin-inline-start: 0.5rem;
+  padding: 0 0.5rem;
+  border-radius: 999px;
+  background: #fff4d6;
+  color: #7a5a00;
+  font-size: 0.8rem;
+}
+
+.status-list li.down {
+  color: var(--danger);
+}
+
+.prose {
+  white-space: pre-wrap;
+}
+
+.button,
+button.button {
+  display: inline-block;
+  border: 0;
+  border-radius: var(--radius);
+  padding: 0.55rem 1rem;
+  background: var(--accent);
+  color: var(--accent-ink);
+  font: inherit;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.button.secondary {
+  background: transparent;
+  color: var(--ink);
+  border: 1px solid var(--line);
+}
+
+.button.danger {
+  background: var(--danger);
+}
+
+.button:disabled {
+  opacity: 0.6;
+}
+
+.link-button {
+  background: none;
+  border: 0;
+  color: var(--accent);
+  font: inherit;
+  cursor: pointer;
+}
+
+.actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-block-start: 1rem;
+}
+
+.form {
+  display: grid;
+  gap: 0.9rem;
+  max-width: 560px;
+}
+
+.form label {
+  display: grid;
+  gap: 0.25rem;
+  font-weight: 500;
+}
+
+.form label.check {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.form .row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+input,
+select,
+textarea {
+  font: inherit;
+  padding: 0.45rem 0.6rem;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--card);
+  color: var(--ink);
+  width: 100%;
+}
+
+label.inline {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-block: 0.5rem;
+}
+
+label.inline select,
+.switcher select,
+.form label.check input {
+  width: auto;
+}
+
+.note {
+  border-radius: var(--radius);
+  padding: 0.6rem 1rem;
+  margin-block: 0.75rem;
+}
+
+.note p {
+  margin: 0;
+}
+
+.note-error {
+  background: #fdecea;
+  color: var(--danger);
+  border: 1px solid #f5c2bd;
+}
+
+@media (min-width: 720px) {
+  .cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  h1 {
+    font-size: 1.75rem;
+  }
+}

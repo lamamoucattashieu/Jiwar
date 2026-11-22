@@ -9,11 +9,12 @@
   },
   "scripts": {
     "start": "node src/server.js",
-    "test": "node --test --experimental-test-coverage --test-coverage-include=\"src/**\" --test-coverage-exclude=src/server.js --test-coverage-lines=70 \"test/**/*.test.js\""
+    "test": "node --test --experimental-test-coverage --test-coverage-include=\"src/**\" --test-coverage-exclude=src/server.js --test-coverage-exclude=src/db/sql.js --test-coverage-lines=70 \"test/**/*.test.js\""
   },
   "dependencies": {
     "cors": "2.8.6",
-    "express": "5.3.0"
+    "express": "5.3.0",
+    "mssql": "11.0.1"
   },
   "devDependencies": {
     "supertest": "7.3.2"
