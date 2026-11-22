@@ -1,19 +1,37 @@
-/* Mobile first: the base styles fit a 360 px screen; wider screens add room.
-   Logical properties (margin-inline, padding-inline) flip for Arabic automatically. */
+/* Jiwar design system: deep green and warm cream, a classical serif for headings,
+   the key logo. Tokens follow the brand table in our earlier Jiwar PRD; components
+   use the names, never raw hex values.
+   Mobile first: the base styles fit a 360 px screen. Logical properties
+   (margin-inline, padding-inline) flip for Arabic automatically. */
 :root {
-  --ink: #1d2433;
-  --muted: #5d6677;
-  --line: #dfe3ea;
-  --bg: #f7f8fa;
-  --card: #ffffff;
-  --accent: #0f7b5f;
-  --accent-ink: #ffffff;
-  --danger: #b3261e;
-  --radius: 10px;
-  font-family: system-ui, 'Segoe UI', Tahoma, sans-serif;
-  color: var(--ink);
-  background: var(--bg);
-  line-height: 1.5;
+  --green-900: #163f2a; /* main text, dark sections */
+  --green-700: #1f5c3d; /* primary buttons, highlighted cards, logo background */
+  --green-600: #2a6b49; /* hover on primary buttons */
+  --green-100: #dce8df; /* success badges, soft highlights */
+  --cream-100: #f4efe3; /* page background */
+  --cream-50: #fbf8f0; /* cards and panels */
+  --sand-300: #ddd5c0; /* borders and dividers */
+  --sand-500: #d9d2bf; /* secondary text on dark green */
+  --muted-600: #4a6b57; /* secondary text, captions */
+  --red-600: #b8362d; /* section labels, warnings */
+  --red-500: #d9443a; /* the logo's dot and urgent alerts only */
+
+  --font-heading: 'Cormorant Garamond', Georgia, serif;
+  --font-body: 'Inter', system-ui, 'Segoe UI', sans-serif;
+  --radius-card: 24px;
+  --radius-input: 12px;
+
+  font-family: var(--font-body);
+  font-size: 16px;
+  color: var(--green-900);
+  background: var(--cream-100);
+  line-height: 1.55;
+}
+
+/* Arabic: Amiri for headings and the wordmark, IBM Plex Sans Arabic for text. */
+:root:lang(ar) {
+  --font-heading: 'Amiri', serif;
+  --font-body: 'IBM Plex Sans Arabic', 'Inter', system-ui, sans-serif;
 }
 
 * {
@@ -25,56 +43,119 @@ body {
 }
 
 a {
-  color: var(--accent);
+  color: var(--green-700);
+}
+
+:focus-visible {
+  outline: 3px solid var(--green-600);
+  outline-offset: 2px;
+}
+
+h1,
+h2 {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  line-height: 1.15;
+  color: var(--green-900);
 }
 
 h1 {
-  font-size: 1.5rem;
-  margin-block: 0.5rem 0.75rem;
+  font-size: 2rem;
+  margin-block: 0.25rem 0.75rem;
 }
 
 h2 {
-  font-size: 1.15rem;
+  font-size: 1.5rem;
   margin-block: 1.5rem 0.5rem;
 }
 
+/* Small letter-spaced label above a heading. */
+.eyebrow {
+  margin: 1.5rem 0 0;
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--red-600);
+}
+
+:root:lang(ar) .eyebrow {
+  letter-spacing: 0;
+  font-size: 0.85rem;
+}
+
+.muted {
+  color: var(--muted-600);
+}
+
+.lead {
+  font-size: 1.05rem;
+  color: var(--muted-600);
+}
+
+/* Header */
 .topbar {
-  background: var(--card);
-  border-block-end: 1px solid var(--line);
+  background: var(--green-900);
+  color: var(--cream-100);
 }
 
 .topbar-inner {
-  max-width: 960px;
+  max-width: 1040px;
   margin-inline: auto;
-  padding: 0.5rem 1rem;
+  padding: 0.6rem 1rem;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.5rem 1rem;
+  gap: 0.5rem 1.25rem;
 }
 
 .brand {
-  font-weight: 700;
-  color: var(--accent);
-  font-size: 1.15rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  text-decoration: none;
+  color: var(--cream-100);
+}
+
+.brand-mark {
+  height: 34px;
+  width: auto;
+}
+
+.brand-word {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-weight: 600;
+  font-size: 1.5rem;
+  letter-spacing: 0.04em;
+}
+
+.brand-word-ar {
+  font-family: 'Amiri', serif;
+  font-size: 1.35rem;
+  color: var(--sand-500);
 }
 
 nav {
   display: flex;
-  gap: 0.75rem;
+  gap: 1rem;
   flex-wrap: wrap;
 }
 
 nav a {
   text-decoration: none;
-  color: var(--muted);
+  color: var(--sand-500);
   padding-block: 0.25rem;
+  font-weight: 500;
+}
+
+nav a:hover {
+  color: var(--cream-100);
 }
 
 nav a.active {
-  color: var(--ink);
-  font-weight: 600;
-  border-block-end: 2px solid var(--accent);
+  color: var(--cream-100);
+  border-block-end: 2px solid var(--red-500);
 }
 
 .topbar-tools {
@@ -90,26 +171,26 @@ nav a.active {
   align-items: center;
   gap: 0.4rem;
   font-size: 0.875rem;
-  color: var(--muted);
+  color: var(--sand-500);
 }
 
 .switcher select {
-  max-width: 220px;
+  max-width: 230px;
+  background: var(--green-700);
+  color: var(--cream-100);
+  border-color: var(--green-600);
 }
 
+.topbar .link-button {
+  color: var(--cream-100);
+  font-weight: 600;
+}
+
+/* Page */
 .page {
-  max-width: 960px;
+  max-width: 1040px;
   margin-inline: auto;
-  padding: 1rem;
-}
-
-.lead {
-  font-size: 1.05rem;
-  color: var(--muted);
-}
-
-.muted {
-  color: var(--muted);
+  padding: 1rem 1rem 3rem;
 }
 
 .page-head {
@@ -120,69 +201,155 @@ nav a.active {
   flex-wrap: wrap;
 }
 
-.cards {
+/* Home hero: a highlighted card in the logo's green. */
+.hero {
+  display: grid;
+  gap: 1.25rem;
+  align-items: center;
+  background: var(--green-700);
+  color: var(--cream-100);
+  border-radius: var(--radius-card);
+  padding: 1.5rem;
+  margin-block-start: 0.5rem;
+}
+
+.hero h1 {
+  color: var(--cream-100);
+  font-size: 2.2rem;
+}
+
+.hero-logo {
+  width: 96px;
+  height: auto;
+  border-radius: 12px;
+}
+
+.hero-text {
+  color: var(--sand-500);
+  font-size: 1.05rem;
+  margin-block: 0 1.25rem;
+}
+
+.eyebrow-on-dark {
+  color: var(--sand-500);
+  margin-block-start: 0;
+}
+
+/* Cards */
+.cards,
+.status-grid {
   list-style: none;
   padding: 0;
   display: grid;
-  gap: 0.75rem;
+  gap: 0.9rem;
 }
 
 .card {
-  background: var(--card);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  padding: 0.9rem 1rem;
+  background: var(--cream-50);
+  border: 1px solid var(--sand-300);
+  border-radius: var(--radius-card);
+  padding: 1.1rem 1.25rem;
+}
+
+.status-grid .card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  font-weight: 500;
 }
 
 .card-title {
+  font-family: var(--font-heading);
   font-weight: 600;
-  font-size: 1.05rem;
+  font-size: 1.35rem;
+  color: var(--green-900);
   text-decoration: none;
 }
 
-.card p {
-  margin: 0.25rem 0 0;
+.card-title:hover {
+  color: var(--green-600);
 }
 
+.card p {
+  margin: 0.35rem 0 0;
+  color: var(--muted-600);
+}
+
+/* Badges always carry a word, never colour alone. */
 .badge {
   display: inline-block;
   margin-inline-start: 0.5rem;
-  padding: 0 0.5rem;
+  padding: 0.1rem 0.65rem;
   border-radius: 999px;
-  background: #fff4d6;
-  color: #7a5a00;
   font-size: 0.8rem;
+  font-weight: 600;
+  background: var(--sand-300);
+  color: var(--green-900);
 }
 
-.status-list li.down {
-  color: var(--danger);
+.badge-ok {
+  background: var(--green-100);
+  color: var(--green-700);
+}
+
+.badge-wait {
+  background: var(--sand-300);
+  color: var(--muted-600);
+}
+
+.badge-bad {
+  background: #f6dcd9;
+  color: var(--red-600);
 }
 
 .prose {
   white-space: pre-wrap;
 }
 
+/* Buttons: pill-shaped. Primary is green with cream text, secondary is outlined. */
 .button,
 button.button {
   display: inline-block;
-  border: 0;
-  border-radius: var(--radius);
-  padding: 0.55rem 1rem;
-  background: var(--accent);
-  color: var(--accent-ink);
+  border: 2px solid var(--green-700);
+  border-radius: 999px;
+  padding: 0.55rem 1.3rem;
+  background: var(--green-700);
+  color: var(--cream-100);
   font: inherit;
+  font-weight: 600;
   text-decoration: none;
   cursor: pointer;
 }
 
+.button:hover {
+  background: var(--green-600);
+  border-color: var(--green-600);
+}
+
 .button.secondary {
   background: transparent;
-  color: var(--ink);
-  border: 1px solid var(--line);
+  color: var(--green-700);
+}
+
+.button.secondary:hover {
+  background: var(--green-100);
 }
 
 .button.danger {
-  background: var(--danger);
+  background: var(--red-600);
+  border-color: var(--red-600);
+}
+
+.button-light {
+  background: var(--cream-100);
+  border-color: var(--cream-100);
+  color: var(--green-900);
+}
+
+.button-light:hover {
+  background: var(--cream-50);
+  border-color: var(--cream-50);
 }
 
 .button:disabled {
@@ -192,7 +359,7 @@ button.button {
 .link-button {
   background: none;
   border: 0;
-  color: var(--accent);
+  color: var(--green-700);
   font: inherit;
   cursor: pointer;
 }
@@ -200,19 +367,25 @@ button.button {
 .actions {
   display: flex;
   gap: 0.5rem;
-  margin-block-start: 1rem;
+  margin-block-start: 1.25rem;
+  flex-wrap: wrap;
 }
 
+/* Forms */
 .form {
   display: grid;
-  gap: 0.9rem;
-  max-width: 560px;
+  gap: 1rem;
+  max-width: 600px;
+  background: var(--cream-50);
+  border: 1px solid var(--sand-300);
+  border-radius: var(--radius-card);
+  padding: 1.25rem;
 }
 
 .form label {
   display: grid;
-  gap: 0.25rem;
-  font-weight: 500;
+  gap: 0.3rem;
+  font-weight: 600;
 }
 
 .form label.check {
@@ -231,11 +404,12 @@ input,
 select,
 textarea {
   font: inherit;
-  padding: 0.45rem 0.6rem;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: var(--card);
-  color: var(--ink);
+  font-weight: 400;
+  padding: 0.5rem 0.7rem;
+  border: 1px solid var(--sand-300);
+  border-radius: var(--radius-input);
+  background: #fff;
+  color: var(--green-900);
   width: 100%;
 }
 
@@ -244,6 +418,7 @@ label.inline {
   align-items: center;
   gap: 0.5rem;
   margin-block: 0.5rem;
+  font-weight: 500;
 }
 
 label.inline select,
@@ -252,9 +427,10 @@ label.inline select,
   width: auto;
 }
 
+/* Notes */
 .note {
-  border-radius: var(--radius);
-  padding: 0.6rem 1rem;
+  border-radius: var(--radius-input);
+  padding: 0.7rem 1rem;
   margin-block: 0.75rem;
 }
 
@@ -263,17 +439,31 @@ label.inline select,
 }
 
 .note-error {
-  background: #fdecea;
-  color: var(--danger);
-  border: 1px solid #f5c2bd;
+  background: #f6dcd9;
+  color: var(--red-600);
+  border: 1px solid #ebbbb6;
 }
 
 @media (min-width: 720px) {
-  .cards {
+  .cards,
+  .status-grid {
     grid-template-columns: repeat(2, 1fr);
   }
 
+  .hero {
+    grid-template-columns: auto 1fr;
+    padding: 2rem 2.25rem;
+  }
+
+  .hero-logo {
+    width: 120px;
+  }
+
   h1 {
-    font-size: 1.75rem;
+    font-size: 2.4rem;
+  }
+
+  .hero h1 {
+    font-size: 2.8rem;
   }
 }

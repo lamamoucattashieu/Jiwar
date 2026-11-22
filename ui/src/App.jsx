@@ -38,7 +38,13 @@ function Layout() {
     <>
       <header className="topbar">
         <div className="topbar-inner">
-          <span className="brand">Jiwar</span>
+          <NavLink to="/" className="brand" aria-label="Jiwar">
+            <img src="/brand/jiwar-key.svg" alt="" className="brand-mark" />
+            <span className="brand-word">Jiwar</span>
+            <span className="brand-word-ar" lang="ar">
+              جوار
+            </span>
+          </NavLink>
           <nav>
             {NAV.filter((n) => !n.roles || is(...n.roles)).map((n) => (
               <NavLink key={n.to} to={n.to} end={n.end}>
