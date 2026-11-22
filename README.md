@@ -61,9 +61,44 @@ cd services/learning && npm ci && npm test
 cd services/projects && npm ci && npm test
 ```
 
+Lint and format checks for the whole repository (run from the root):
+
+```bash
+npm ci && (cd ui && npm ci)
+npm run lint
+npm run format:check
+```
+
+## CI/CD
+
+| Workflow | When | What |
+|---|---|---|
+| [`ci.yml`](.github/workflows/ci.yml) | Every pull request and every push to a branch other than `main` | Lint, format check, tests with coverage (fails below 70%), `npm audit`, UI build, both images built |
+| [`cd.yml`](.github/workflows/cd.yml) | Every push to `main` (a merged pull request) | Runs CI, pushes both images to GHCR tagged with the commit SHA, deploys them to Azure Container Apps, waits for `/health` to report that SHA, deploys the UI to Static Web Apps, runs [`scripts/smoke-test.sh`](scripts/smoke-test.sh) against the live URLs, then tags the commit `release-YYYY.MM.DD-N` |
+
 ## Azure setup
 
-_Documented in Sprint 1, together with the deployment pipeline._
+Everything lives in the group's resource group in `westeurope` and is declared in [`infra/main.bicep`](infra/main.bicep): a Log Analytics workspace, a Container Apps environment, the two Container Apps (scale 0 to 1), one SQL server with two serverless databases (15-minute auto-pause, 2 GB) and one Static Web App. One member runs the setup once; after that only the pipeline changes anything.
+
+1. Accept the Microsoft invitation from IE, then sign in to IE's directory:
+   ```bash
+   az login --tenant 5ca2bc70-353c-4d1f-b7d7-7f2b2259df68   # add --use-device-code if the browser fails
+   gh auth login
+   ```
+2. Set the group's values and choose three strong passwords (never commit them):
+   ```bash
+   export PREFIX=sdd-<class>-g<N>
+   export GITHUB_REPO=lamamoucattashieu/Jiwar
+   export SQL_ADMIN_PASSWORD='...' LEARNING_DB_PASSWORD='...' PROJECTS_DB_PASSWORD='...'
+   ```
+3. Run [`infra/setup.sh`](infra/setup.sh) (Azure Cloud Shell has `az` and `sqlcmd`):
+   ```bash
+   bash infra/setup.sh
+   ```
+   It deploys the Bicep file, creates one contained user per database (`db_ddladmin`, `db_datareader`, `db_datawriter`) through a temporary firewall rule for your IP that it removes again, registers the federated credentials of `<prefix>-github` for `main`, and sets the GitHub secrets (`AZURE_CLIENT_ID`, `AZURE_TENANT_ID`, `AZURE_SUBSCRIPTION_ID`) and variables (`PREFIX`, `RESOURCE_GROUP`).
+4. Merge to `main`. The first CD run fails to pull the images because new GHCR packages are private: make `jiwar-learning` and `jiwar-projects` public in the package settings on GitHub, then re-run the failed job.
+
+To read a service's logs: `az containerapp logs show -n <prefix>-learning -g rg-<prefix> --follow`.
 
 ## Team
 

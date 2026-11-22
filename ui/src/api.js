@@ -14,6 +14,9 @@ export class ApiError extends Error {
   }
 }
 
+const wakingUp = (service) =>
+  `The ${service} service is starting up after being idle. Please try again in a minute.`;
+
 let currentUserId = null;
 export const setApiUser = (id) => {
   currentUserId = id;
@@ -33,10 +36,15 @@ export async function api(service, path, { method = 'GET', body } = {}) {
       signal: AbortSignal.timeout(TIMEOUT_MS),
     });
   } catch (err) {
-    const why = err.name === 'TimeoutError' ? 'did not answer in time' : 'cannot be reached';
-    throw new ApiError(`The ${service} service ${why}. The rest of Jiwar still works; try again shortly.`);
+    if (err.name === 'TimeoutError') throw new ApiError(wakingUp(service));
+    throw new ApiError(
+      `The ${service} service cannot be reached. The rest of Jiwar still works; try again shortly.`,
+    );
   }
 
+  // On Azure, the first request after an idle period starts the container and
+  // wakes the paused database; until then Azure answers 503.
+  if (res.status === 503) throw new ApiError(wakingUp(service), { status: 503 });
   if (res.status === 204) return null;
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {

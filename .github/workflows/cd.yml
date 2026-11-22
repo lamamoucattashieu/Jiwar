@@ -1,0 +1,176 @@
+# CD: every push to main (a merged pull request) runs CI, then ships.
+# Nothing here creates Azure resources: infra/setup.sh did that once (Bicep).
+name: CD
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Never run two deploys at once; a newer merge waits for the running one.
+concurrency:
+  group: cd-main
+  cancel-in-progress: false
+
+env:
+  NODE_VERSION: 24.11.1
+  REGISTRY: ghcr.io
+
+jobs:
+  ci:
+    uses: ./.github/workflows/ci.yml
+
+  push-images:
+    name: Push ${{ matrix.service }} image
+    needs: ci
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      matrix:
+        service: [learning, projects]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Image name (GHCR needs a lowercase owner)
+        id: name
+        run: echo "image=${REGISTRY}/${GITHUB_REPOSITORY_OWNER,,}/jiwar-${{ matrix.service }}" >> "$GITHUB_OUTPUT"
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      # provenance: false gives a plain image manifest that Azure Container Apps can pull.
+      - uses: docker/build-push-action@v6
+        with:
+          context: services/${{ matrix.service }}
+          push: true
+          provenance: false
+          tags: |
+            ${{ steps.name.outputs.image }}:${{ github.sha }}
+            ${{ steps.name.outputs.image }}:main
+          cache-from: type=gha,scope=${{ matrix.service }}
+
+  deploy:
+    name: Deploy to Azure
+    needs: push-images
+    runs-on: ubuntu-latest
+    # No "environment:" here on purpose: it would change the OIDC subject to
+    # repo:<owner>/<repo>:environment:..., and the federated credential is
+    # registered for repo:<owner>/<repo>:ref:refs/heads/main.
+    permissions:
+      contents: read
+      id-token: write # OIDC sign-in as the group's managed identity
+    env:
+      PREFIX: ${{ vars.PREFIX }}
+      RESOURCE_GROUP: ${{ vars.RESOURCE_GROUP }}
+    outputs:
+      learning_url: ${{ steps.urls.outputs.learning }}
+      projects_url: ${{ steps.urls.outputs.projects }}
+      ui_url: ${{ steps.urls.outputs.ui }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Point both Container Apps at this commit's images
+        run: |
+          owner="${GITHUB_REPOSITORY_OWNER,,}"
+          for service in learning projects; do
+            az containerapp update \
+              --name "${PREFIX}-${service}" \
+              --resource-group "$RESOURCE_GROUP" \
+              --image "${REGISTRY}/${owner}/jiwar-${service}:${GITHUB_SHA}" \
+              --set-env-vars "GIT_SHA=${GITHUB_SHA}" \
+              --output none
+          done
+
+      - name: Read the public addresses
+        id: urls
+        run: |
+          fqdn() { az containerapp show -n "${PREFIX}-$1" -g "$RESOURCE_GROUP" --query properties.configuration.ingress.fqdn -o tsv; }
+          {
+            echo "learning=https://$(fqdn learning)"
+            echo "projects=https://$(fqdn projects)"
+            echo "ui=https://$(az staticwebapp show -n "${PREFIX}-ui" -g "$RESOURCE_GROUP" --query defaultHostname -o tsv)"
+          } >> "$GITHUB_OUTPUT"
+
+      # The services apply their migrations on startup, so a 200 with this
+      # commit's SHA means the new revision is up and its migrations ran.
+      - name: Wait for /health on both services
+        run: |
+          bash scripts/wait-for-health.sh "${{ steps.urls.outputs.learning }}" "$GITHUB_SHA"
+          bash scripts/wait-for-health.sh "${{ steps.urls.outputs.projects }}" "$GITHUB_SHA"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: ui/package-lock.json
+
+      - name: Build the UI with the Azure addresses
+        working-directory: ui
+        run: |
+          npm ci
+          npm run build
+          cat > dist/config.js <<EOF
+          // Written by cd.yml for commit ${GITHUB_SHA}.
+          window.JIWAR_CONFIG = {
+            LEARNING_URL: '${{ steps.urls.outputs.learning }}',
+            PROJECTS_URL: '${{ steps.urls.outputs.projects }}',
+          };
+          EOF
+
+      - name: Get the Static Web App deployment token
+        id: swa
+        run: |
+          token=$(az staticwebapp secrets list -n "${PREFIX}-ui" -g "$RESOURCE_GROUP" --query properties.apiKey -o tsv)
+          echo "::add-mask::$token"
+          echo "token=$token" >> "$GITHUB_OUTPUT"
+
+      - uses: Azure/static-web-apps-deploy@v1
+        with:
+          azure_static_web_apps_api_token: ${{ steps.swa.outputs.token }}
+          action: upload
+          app_location: ui/dist
+          skip_app_build: true
+          skip_api_build: true
+
+  smoke-test:
+    name: Smoke test the live system
+    needs: deploy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: >
+          bash scripts/smoke-test.sh
+          "${{ needs.deploy.outputs.learning_url }}"
+          "${{ needs.deploy.outputs.projects_url }}"
+          "${{ needs.deploy.outputs.ui_url }}"
+
+  release-tag:
+    name: Tag the release
+    needs: smoke-test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      # One tag per successful production deploy, e.g. release-2026.11.23-1, so
+      # any live version can be traced back to its commit and rolled back.
+      - name: Create release tag
+        run: |
+          git fetch --tags --quiet
+          base="release-$(date -u +%Y.%m.%d)"
+          n=1
+          while git rev-parse -q --verify "refs/tags/${base}-${n}" >/dev/null; do n=$((n + 1)); done
+          git tag "${base}-${n}" "$GITHUB_SHA"
+          git push origin "${base}-${n}"
