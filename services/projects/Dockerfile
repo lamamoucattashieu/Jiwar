@@ -10,6 +10,7 @@ RUN npm ci --omit=dev && npm cache clean --force
 
 # Copy only the application source (no COPY . ., no tests, no .env).
 COPY src ./src
+COPY migrations ./migrations
 
 USER node
 EXPOSE 8000
