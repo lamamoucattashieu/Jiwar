@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 620" aria-label="Jiwar key">
+  <path d="M150 20 C100 60 60 110 60 170 L60 250 L240 250 L240 170 C240 110 200 60 150 20 Z" fill="#1F5C3D"/>
+  <path d="M150 62 C118 92 90 128 90 172 L90 222 L210 222 L210 172 C210 128 182 92 150 62 Z" fill="#F4EFE3"/>
+  <path d="M150 178 C120 172 104 148 110 126 C136 130 150 150 150 178 Z" fill="#1F5C3D"/>
+  <path d="M150 178 C180 172 196 148 190 126 C164 130 150 150 150 178 Z" fill="#1F5C3D"/>
+  <circle cx="150" cy="192" r="11" fill="#D9443A"/>
+  <rect x="110" y="262" width="80" height="22" rx="11" fill="#1F5C3D"/>
+  <rect x="132" y="270" width="36" height="290" rx="6" fill="#1F5C3D"/>
+  <rect x="164" y="470" width="54" height="30" fill="#1F5C3D"/>
+  <rect x="164" y="520" width="54" height="30" fill="#1F5C3D"/>
+</svg>

@@ -5,6 +5,10 @@ import { readSetting, saveSetting } from './storage.js';
 const STRINGS = {
   en: {
     appTagline: 'Coding and AI training for Palestinian refugee youth, connected to paid work.',
+    heroEyebrow: 'Learn, then earn',
+    heroTitle: 'Training that opens the door to paid work',
+    browseCourses: 'Browse courses',
+    learning: 'Learning',
     language: 'العربية',
     actingAs: 'Acting as',
     visitor: 'Visitor',
@@ -43,6 +47,10 @@ const STRINGS = {
   },
   ar: {
     appTagline: 'تدريب على البرمجة والذكاء الاصطناعي للشباب اللاجئين الفلسطينيين، مرتبط بعمل مدفوع.',
+    heroEyebrow: 'تعلّم، ثم اكسب',
+    heroTitle: 'تدريب يفتح الباب لعمل مدفوع',
+    browseCourses: 'تصفّح الدورات',
+    learning: 'التعلّم',
     language: 'English',
     actingAs: 'المستخدم الحالي',
     visitor: 'زائر',

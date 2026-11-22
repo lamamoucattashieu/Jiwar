@@ -36,6 +36,7 @@ export default function Courses({ mine = false }) {
 
   return (
     <section>
+      <p className="eyebrow">{t('learning')}</p>
       <div className="page-head">
         <h1>{mine ? t('navTeach') : t('catalogue')}</h1>
         {is('instructor', 'admin') && (
