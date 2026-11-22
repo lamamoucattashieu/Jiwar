@@ -4,6 +4,7 @@ import { api } from '../api.js';
 import { useLanguage } from '../i18n.jsx';
 import { useSession } from '../session.jsx';
 import { ErrorNote, Loading, useLoad } from '../components.jsx';
+import GradeForm from './GradeForm.jsx';
 
 export default function CourseDetail() {
   const { id } = useParams();
@@ -48,6 +49,7 @@ export default function CourseDetail() {
               </button>
             </div>
           )}
+          {canManage && <GradeForm course={course} />}
         </article>
       )}
     </section>

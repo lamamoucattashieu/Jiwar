@@ -10,6 +10,8 @@ export const courseInput = z.object({
   credits: z.number().int().min(0).max(50),
   passMark: z.number().int().min(0).max(100).default(60),
   published: z.boolean().default(false),
+  // The level this course unlocks (1 Web basics, 2 React, 3 Practical AI), if any.
+  requiredForLevel: z.number().int().min(1).max(3).nullable().default(null),
 });
 
 export const listQuery = z.object({

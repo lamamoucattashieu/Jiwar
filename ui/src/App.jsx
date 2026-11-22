@@ -5,12 +5,20 @@ import Home from './pages/Home.jsx';
 import Courses from './pages/Courses.jsx';
 import CourseDetail from './pages/CourseDetail.jsx';
 import CourseForm from './pages/CourseForm.jsx';
+import Progress from './pages/Progress.jsx';
+import VerificationQueue from './pages/VerificationQueue.jsx';
+import Permits from './pages/Permits.jsx';
+import Notifications from './pages/Notifications.jsx';
 
 // Navigation per role. Each feature adds its links here with the roles that see them.
 const NAV = [
   { to: '/', key: 'navHome', end: true },
   { to: '/courses', key: 'navCourses' },
   { to: '/teach', key: 'navTeach', roles: ['instructor'] },
+  { to: '/progress', key: 'navProgress', roles: ['trainee'] },
+  { to: '/admin/verification', key: 'navVerification', roles: ['admin'] },
+  { to: '/admin/permits', key: 'navPermits', roles: ['admin'] },
+  { to: '/notifications', key: 'navNotifications', roles: ['trainee', 'instructor', 'company', 'admin'] },
 ];
 
 function UserSwitcher() {
@@ -38,7 +46,13 @@ function Layout() {
     <>
       <header className="topbar">
         <div className="topbar-inner">
-          <span className="brand">Jiwar</span>
+          <NavLink to="/" className="brand" aria-label="Jiwar">
+            <img src="/brand/jiwar-key.svg" alt="" className="brand-mark" />
+            <span className="brand-word">Jiwar</span>
+            <span className="brand-word-ar" lang="ar">
+              جوار
+            </span>
+          </NavLink>
           <nav>
             {NAV.filter((n) => !n.roles || is(...n.roles)).map((n) => (
               <NavLink key={n.to} to={n.to} end={n.end}>
@@ -62,6 +76,11 @@ function Layout() {
           <Route path="/courses/new" element={<CourseForm />} />
           <Route path="/courses/:id" element={<CourseDetail />} />
           <Route path="/courses/:id/edit" element={<CourseForm />} />
+          <Route path="/progress" element={<Progress />} />
+          <Route path="/trainees/:id" element={<Progress />} />
+          <Route path="/admin/verification" element={<VerificationQueue />} />
+          <Route path="/admin/permits" element={<Permits />} />
+          <Route path="/notifications" element={<Notifications />} />
         </Routes>
       </main>
     </>

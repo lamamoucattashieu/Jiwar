@@ -6,10 +6,15 @@ import { errorHandler, notFoundHandler } from './http/errors.js';
 import { createCourseService } from './courses/courseService.js';
 import { courseRoutes } from './courses/courseRoutes.js';
 import { createMemoryCourseRepository } from './courses/courseRepository.memory.js';
+import { createCreditService } from './credits/creditService.js';
+import { createMemoryCreditStore } from './credits/creditStore.memory.js';
+import { createEventHandlers, createOutboxDispatcher } from './credits/events.js';
+import { creditRoutes } from './credits/creditRoutes.js';
 
 // deps.db: the executor from db/sql.js, or undefined when running without a database.
 // deps.repos: repositories, so tests and local runs can swap SQL for memory.
-export function createApp(config, { log, db, repos = {} } = {}) {
+// deps.today: returns today's date (YYYY-MM-DD); tests pass a fixed day.
+export function createApp(config, { log, db, repos = {}, today } = {}) {
   const app = express();
   app.disable('x-powered-by');
   app.use(requestLogger(log));
@@ -39,8 +44,20 @@ export function createApp(config, { log, db, repos = {} } = {}) {
     res.json(req.user);
   });
 
-  const courses = createCourseService(repos.courses ?? createMemoryCourseRepository());
-  app.use('/courses', courseRoutes(courses));
+  const courseRepo = repos.courses ?? createMemoryCourseRepository();
+  app.use('/courses', courseRoutes(createCourseService(courseRepo)));
+
+  const creditStore = repos.credits ?? createMemoryCreditStore();
+  const credits = createCreditService({ store: creditStore, courses: courseRepo, today });
+  const outbox = createOutboxDispatcher({
+    store: creditStore,
+    handlers: createEventHandlers({ service: credits, store: creditStore }),
+    log,
+  });
+  app.use(creditRoutes(credits, outbox));
+  // server.js also drains the outbox on startup and on a timer, for events whose
+  // first delivery failed.
+  app.locals.outbox = outbox;
 
   app.use(notFoundHandler);
   app.use(errorHandler(log));

@@ -1,18 +1,10 @@
 // Course rules, independent of HTTP and of the database. The repository is
 // passed in (a port), so the same rules run against SQL Server in production
 // and an in-memory store in tests.
-import { badRequest, forbidden, notFound } from '../http/errors.js';
+import { forbidden, notFound } from '../http/errors.js';
 import { hasRole } from '../http/auth.js';
+import { parse } from '../http/validate.js';
 import { courseInput, idParam, listQuery } from './courseSchema.js';
-
-function parse(schema, value) {
-  const result = schema.safeParse(value);
-  if (!result.success) {
-    const details = result.error.issues.map((i) => ({ field: i.path.join('.'), message: i.message }));
-    throw badRequest('Some fields are not valid', details);
-  }
-  return result.data;
-}
 
 const canManage = (user, course) =>
   hasRole(user, 'admin') || (hasRole(user, 'instructor') && course.instructorId === user.id);
