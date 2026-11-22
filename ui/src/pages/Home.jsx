@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { SERVICES } from '../api.js';
 import { useLanguage } from '../i18n.jsx';
 
@@ -23,23 +24,42 @@ export default function Home() {
     });
   }, []);
 
-  const label = (name) => {
+  // Status is always a word as well as a colour.
+  const badge = (name) => {
     const s = status[name];
-    if (!s) return t('checking');
-    return s.ok ? `${t('statusOk')} (${s.version})` : t('statusDown');
+    if (!s) return <span className="badge badge-wait">{t('checking')}</span>;
+    return s.ok ? (
+      <span className="badge badge-ok">
+        {t('statusOk')} · {s.version}
+      </span>
+    ) : (
+      <span className="badge badge-bad">{t('statusDown')}</span>
+    );
   };
 
   return (
     <section>
-      <h1>Jiwar</h1>
-      <p className="lead">{t('appTagline')}</p>
-      <h2>{t('systemStatus')}</h2>
-      <ul className="status-list">
-        <li className={status.learning?.ok === false ? 'down' : ''}>
-          {t('learningService')}: {label('learning')}
+      <div className="hero">
+        <img src="/brand/jiwar-logo.png" alt="Jiwar, جوار" className="hero-logo" />
+        <div>
+          <p className="eyebrow eyebrow-on-dark">{t('heroEyebrow')}</p>
+          <h1>{t('heroTitle')}</h1>
+          <p className="hero-text">{t('appTagline')}</p>
+          <Link className="button button-light" to="/courses">
+            {t('browseCourses')}
+          </Link>
+        </div>
+      </div>
+
+      <p className="eyebrow">{t('systemStatus')}</p>
+      <ul className="status-grid">
+        <li className="card">
+          <span>{t('learningService')}</span>
+          {badge('learning')}
         </li>
-        <li className={status.projects?.ok === false ? 'down' : ''}>
-          {t('projectsService')}: {label('projects')}
+        <li className="card">
+          <span>{t('projectsService')}</span>
+          {badge('projects')}
         </li>
       </ul>
     </section>
