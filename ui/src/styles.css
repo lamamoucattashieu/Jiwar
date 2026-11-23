@@ -467,3 +467,121 @@ label.inline select,
     font-size: 2.8rem;
   }
 }
+
+/* Credits, levels and permits */
+.note-ok {
+  background: var(--green-100);
+  color: var(--green-700);
+  border: 1px solid #c3d8c8;
+}
+
+.note-locked {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  background: var(--cream-50);
+  border: 1px solid var(--sand-300);
+}
+
+.lock-key {
+  height: 40px;
+  width: auto;
+}
+
+.hero-compact {
+  margin-block-end: 1rem;
+}
+
+/* Big numbers on dashboards use the heading serif. */
+.big-number {
+  font-family: var(--font-heading);
+  font-size: 4rem;
+  line-height: 1;
+  margin: 0.25rem 0;
+}
+
+.progress {
+  block-size: 12px;
+  border-radius: 999px;
+  background: var(--green-900);
+  overflow: hidden;
+}
+
+.progress span {
+  display: block;
+  block-size: 100%;
+  background: var(--cream-100);
+  border-radius: 999px;
+}
+
+.missing {
+  margin: 0.75rem 0 0;
+  padding-inline-start: 1.1rem;
+  color: var(--sand-500);
+}
+
+.ledger {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  gap: 0.6rem;
+}
+
+.ledger .card {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  padding: 0.75rem 1rem;
+}
+
+.amount {
+  font-family: var(--font-heading);
+  font-size: 1.6rem;
+  min-inline-size: 3.2rem;
+  text-align: center;
+}
+
+.amount.plus {
+  color: var(--green-700);
+}
+
+.amount.minus {
+  color: var(--red-600);
+}
+
+.small {
+  font-size: 0.85rem;
+}
+
+label.reason {
+  display: grid;
+  gap: 0.3rem;
+  margin-block-start: 0.75rem;
+  font-weight: 500;
+}
+
+.card .row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+  margin-block-start: 0.75rem;
+}
+
+.card .row label {
+  display: grid;
+  gap: 0.3rem;
+  font-weight: 500;
+}
+
+.cards.cards-single {
+  grid-template-columns: 1fr;
+}
+
+.card.read {
+  opacity: 0.7;
+}
+
+.note-text {
+  color: var(--green-900);
+  font-weight: 500;
+}

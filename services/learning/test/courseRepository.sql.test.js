@@ -33,6 +33,7 @@ test('maps database rows to camelCase courses', async () => {
     passMark: 60,
     instructorId: 'instructor-omar',
     published: true,
+    requiredForLevel: null,
     createdAt: 't1',
     updatedAt: 't2',
   });
@@ -74,4 +75,11 @@ test('insert, update and remove use parameters and return the stored course', as
 
   await repo.remove(7);
   assert.deepEqual(db.calls[2].params, { id: 7 });
+});
+
+test('deleting a course that has graded results is a clear 409, other errors pass through', async () => {
+  const fk = Object.assign(new Error('fk'), { number: 547 });
+  const repo = (err) => createSqlCourseRepository({ query: async () => Promise.reject(err) });
+  await assert.rejects(repo(fk).remove(1), (e) => e.status === 409);
+  await assert.rejects(repo(new Error('down')).remove(1), /down/);
 });
