@@ -23,6 +23,30 @@ export default function ProjectRequest() {
   });
   const [error, setError] = useState(null);
   const set = (field) => (e) => setForm((f) => ({ ...f, [field]: e.target.value }));
+  const [idea, setIdea] = useState('');
+  const [suggestion, setSuggestion] = useState(null);
+  const [busy, setBusy] = useState(false);
+
+  // Story #23: the business's own words become a draft brief it can still edit.
+  async function fillWithAi() {
+    setError(null);
+    setBusy(true);
+    try {
+      const draft = await api('projects', '/ai/brief', { method: 'POST', body: { description: idea } });
+      setForm((f) => ({
+        ...f,
+        title: draft.title,
+        goals: draft.goals,
+        features: draft.features || f.features,
+        packCode: draft.packCode ?? '',
+      }));
+      setSuggestion(draft);
+    } catch (err) {
+      setError(err);
+    } finally {
+      setBusy(false);
+    }
+  }
 
   async function submit(e) {
     e.preventDefault();
@@ -48,6 +72,28 @@ export default function ProjectRequest() {
       <p className="eyebrow">{t('forBusinesses')}</p>
       <h1>{t('newRequest')}</h1>
       <ErrorNote error={error} />
+      <div className="card ai-card">
+        <p className="eyebrow">{t('aiBriefTitle')}</p>
+        <label className="reason">
+          {t('aiBriefIntro')}
+          <textarea value={idea} onChange={(e) => setIdea(e.target.value)} rows={3} dir="auto" />
+        </label>
+        <div className="actions">
+          <button
+            type="button"
+            className="button secondary"
+            disabled={busy || idea.trim().length < 15}
+            onClick={fillWithAi}
+          >
+            {busy ? t('aiThinking') : t('aiFillForm')}
+          </button>
+        </div>
+        {suggestion && (
+          <p className="note note-ok small" role="status">
+            {suggestion.reason} {t('aiCheckForm')} {suggestion.source === 'mock' && t('aiOfflineNote')}
+          </p>
+        )}
+      </div>
       <form className="form" onSubmit={submit}>
         <label>
           {t('pack')}

@@ -281,6 +281,7 @@ function AssignPicker({ p, act }) {
     <div>
       <ErrorNote error={error} />
       {loading && <p className="muted">{t('checkingEligibility')}</p>}
+      {data && <p className="muted small">{t('rankedByModel')}</p>}
       {data && (
         <ul className="plain">
           {data.items.map((c) => (
@@ -303,6 +304,11 @@ function AssignPicker({ p, act }) {
                   </span>
                 )}
                 {c.preferred && <span className="badge">{t('preferredByClient')}</span>}
+                {typeof c.score === 'number' && (
+                  <span className="badge match" title={t('matchScoreHelp')}>
+                    {t('matchScore')} {c.score}
+                  </span>
+                )}
               </label>
             </li>
           ))}

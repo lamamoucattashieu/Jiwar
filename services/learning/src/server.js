@@ -5,6 +5,8 @@ import { connectWithRetry, createExecutor } from './db/sql.js';
 import { loadMigrations, runMigrations } from './db/migrate.js';
 import { createSqlCourseRepository } from './courses/courseRepository.sql.js';
 import { createSqlCreditStore } from './credits/creditStore.sql.js';
+import { createSqlWorkspaceStore } from './workspace/workspaceStore.sql.js';
+import { createSqlNoteRepository } from './ai/noteRepository.js';
 
 // Retry outbox events whose first delivery failed. Only while the container runs:
 // Container Apps stops it when idle, so this never keeps Azure SQL awake.
@@ -20,7 +22,12 @@ if (config.databaseUrl) {
   const dir = fileURLToPath(new URL('../migrations', import.meta.url));
   const applied = await runMigrations(db, loadMigrations(dir), log);
   log(JSON.stringify({ msg: 'migrations up to date', applied }));
-  repos = { courses: createSqlCourseRepository(db), credits: createSqlCreditStore(db) };
+  repos = {
+    courses: createSqlCourseRepository(db),
+    credits: createSqlCreditStore(db),
+    workspace: createSqlWorkspaceStore(db),
+    notes: createSqlNoteRepository(db),
+  };
 } else {
   log(JSON.stringify({ msg: 'DATABASE_URL not set, using in-memory storage' }));
 }

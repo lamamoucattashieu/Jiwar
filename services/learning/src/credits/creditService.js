@@ -176,6 +176,9 @@ export function createCreditService({ store, courses, today = todayUtc }) {
         level: profile?.level ?? 0,
         permitValid: isPermitValid(permit, today()),
         projectsPaused: profile?.projectsPaused ?? false,
+        // Inputs for the matching model in the projects service.
+        credits: await store.creditTotal(traineeId),
+        projectsCompleted: await store.countProjectCredits(traineeId),
       };
     },
 

@@ -129,6 +129,16 @@ export function createMemoryProjectStore({ packs = DEFAULT_PACKS } = {}) {
       );
     },
 
+    // For the matching model: the trainee's average client rating and current workload.
+    async traineeStats(traineeId) {
+      const mine = state.projects.filter((p) => p.traineeId === traineeId);
+      const rated = mine.filter((p) => p.status === 'approved' && p.rating);
+      return {
+        avgRating: rated.length ? rated.reduce((s, p) => s + p.rating, 0) / rated.length : 0,
+        activeProjects: mine.filter((p) => ['in_progress', 'in_review'].includes(p.status)).length,
+      };
+    },
+
     addPayout: async (p) => add('payouts', 'payout', p),
     findPayout: async (projectId) => copy(state.payouts.find((p) => p.projectId === projectId) ?? null),
     listPayouts: async ({ traineeId }) =>

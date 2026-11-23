@@ -69,11 +69,26 @@ npm run lint
 npm run format:check
 ```
 
+## AI features
+
+| Feature | Where | How |
+|---|---|---|
+| AI draft review of a pull request | learning, `POST /pulls/:id/ai-review` | Suggests a grade and feedback; the instructor decides |
+| Bilingual tutor | learning, `POST /courses/:id/tutor` | Answers from the course notes (TF-IDF retrieval) in the language of the question |
+| Brief-to-quote assistant | projects, `POST /ai/brief` | Turns a business's own words into the request form |
+| Trainee matching | projects, `GET /projects/:id/candidates` | Ranks eligible trainees with a model trained in `ml/` |
+
+All four work without a key using offline rules. To use Claude, set the `ANTHROPIC_API_KEY` GitHub secret; the CD pipeline copies it into both Container Apps. Answers are cached for a day and each user gets 20 model calls an hour (ADR-6). To retrain the matching model:
+
+```bash
+cd ml && pip install -r requirements.txt && python train.py && python -m pytest
+```
+
 ## CI/CD
 
 | Workflow | When | What |
 |---|---|---|
-| [`ci.yml`](.github/workflows/ci.yml) | Every pull request and every push to a branch other than `main` | Lint, format check, tests with coverage (fails below 70%), `npm audit`, UI build, both images built |
+| [`ci.yml`](.github/workflows/ci.yml) | Every pull request and every push to a branch other than `main` | Lint, format check, tests with coverage (fails below 70%), `npm audit`, UI build, both images built, and the matching model (ruff, pytest, reproducible training) |
 | [`cd.yml`](.github/workflows/cd.yml) | Every push to `main` (a merged pull request) | Runs CI, pushes both images to GHCR tagged with the commit SHA, deploys them to Azure Container Apps, waits for `/health` to report that SHA, deploys the UI to Static Web Apps, runs [`scripts/smoke-test.sh`](scripts/smoke-test.sh) against the live URLs, then tags the commit `release-YYYY.MM.DD-N` |
 
 ## Azure setup
