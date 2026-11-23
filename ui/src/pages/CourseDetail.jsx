@@ -16,6 +16,16 @@ export default function CourseDetail() {
 
   const canManage = course && (is('admin') || (is('instructor') && course.instructorId === user.id));
 
+  // A trainee's own repository for this course, created on first use.
+  async function openWorkspace() {
+    try {
+      const repo = await api('learning', `/courses/${id}/workspace`, { method: 'POST' });
+      navigate(`/workspace/${repo.id}`);
+    } catch (err) {
+      setDeleteError(err);
+    }
+  }
+
   async function remove() {
     if (!window.confirm(t('confirmDelete'))) return;
     try {
@@ -39,6 +49,13 @@ export default function CourseDetail() {
             {course.published ? t('published') : t('draft')}
           </p>
           <p className="prose">{course.description}</p>
+          {is('trainee') && course.published && (
+            <div className="actions">
+              <button type="button" className="button" onClick={openWorkspace}>
+                {t('openWorkspace')}
+              </button>
+            </div>
+          )}
           {canManage && (
             <div className="actions">
               <Link className="button" to={`/courses/${course.id}/edit`}>
