@@ -1,0 +1,851 @@
+/* Jiwar design system: deep green and warm cream, a classical serif for headings,
+   the key logo. Tokens follow the brand table in our earlier Jiwar PRD; components
+   use the names, never raw hex values.
+   Mobile first: the base styles fit a 360 px screen. Logical properties
+   (margin-inline, padding-inline) flip for Arabic automatically. */
+:root {
+  --green-900: #163f2a; /* main text, dark sections */
+  --green-700: #1f5c3d; /* primary buttons, highlighted cards, logo background */
+  --green-600: #2a6b49; /* hover on primary buttons */
+  --green-100: #dce8df; /* success badges, soft highlights */
+  --cream-100: #f4efe3; /* page background */
+  --cream-50: #fbf8f0; /* cards and panels */
+  --sand-300: #ddd5c0; /* borders and dividers */
+  --sand-500: #d9d2bf; /* secondary text on dark green */
+  --muted-600: #4a6b57; /* secondary text, captions */
+  --red-600: #b8362d; /* section labels, warnings */
+  --red-500: #d9443a; /* the logo's dot and urgent alerts only */
+
+  --font-heading: 'Cormorant Garamond', Georgia, serif;
+  --font-body: 'Inter', system-ui, 'Segoe UI', sans-serif;
+  --radius-card: 24px;
+  --radius-input: 12px;
+
+  font-family: var(--font-body);
+  font-size: 16px;
+  color: var(--green-900);
+  background: var(--cream-100);
+  line-height: 1.55;
+}
+
+/* Arabic: Amiri for headings and the wordmark, IBM Plex Sans Arabic for text. */
+:root:lang(ar) {
+  --font-heading: 'Amiri', serif;
+  --font-body: 'IBM Plex Sans Arabic', 'Inter', system-ui, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+}
+
+a {
+  color: var(--green-700);
+}
+
+:focus-visible {
+  outline: 3px solid var(--green-600);
+  outline-offset: 2px;
+}
+
+h1,
+h2 {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  line-height: 1.15;
+  color: var(--green-900);
+}
+
+h1 {
+  font-size: 2rem;
+  margin-block: 0.25rem 0.75rem;
+}
+
+h2 {
+  font-size: 1.5rem;
+  margin-block: 1.5rem 0.5rem;
+}
+
+/* Small letter-spaced label above a heading. */
+.eyebrow {
+  margin: 1.5rem 0 0;
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--red-600);
+}
+
+:root:lang(ar) .eyebrow {
+  letter-spacing: 0;
+  font-size: 0.85rem;
+}
+
+.muted {
+  color: var(--muted-600);
+}
+
+.lead {
+  font-size: 1.05rem;
+  color: var(--muted-600);
+}
+
+/* Header */
+.topbar {
+  background: var(--green-900);
+  color: var(--cream-100);
+}
+
+.topbar-inner {
+  max-width: 1040px;
+  margin-inline: auto;
+  padding: 0.6rem 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 1.25rem;
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  text-decoration: none;
+  color: var(--cream-100);
+}
+
+.brand-mark {
+  height: 34px;
+  width: auto;
+}
+
+.brand-word {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-weight: 600;
+  font-size: 1.5rem;
+  letter-spacing: 0.04em;
+}
+
+.brand-word-ar {
+  font-family: 'Amiri', serif;
+  font-size: 1.35rem;
+  color: var(--sand-500);
+}
+
+nav {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+nav a {
+  text-decoration: none;
+  color: var(--sand-500);
+  padding-block: 0.25rem;
+  font-weight: 500;
+}
+
+nav a:hover {
+  color: var(--cream-100);
+}
+
+nav a.active {
+  color: var(--cream-100);
+  border-block-end: 2px solid var(--red-500);
+}
+
+.topbar-tools {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-inline-start: auto;
+  flex-wrap: wrap;
+}
+
+.switcher {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.875rem;
+  color: var(--sand-500);
+}
+
+.switcher select {
+  max-width: 230px;
+  background: var(--green-700);
+  color: var(--cream-100);
+  border-color: var(--green-600);
+}
+
+.topbar .link-button {
+  color: var(--cream-100);
+  font-weight: 600;
+}
+
+/* Page */
+.page {
+  max-width: 1040px;
+  margin-inline: auto;
+  padding: 1rem 1rem 3rem;
+}
+
+.page-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+/* Home hero: a highlighted card in the logo's green. */
+.hero {
+  display: grid;
+  gap: 1.25rem;
+  align-items: center;
+  background: var(--green-700);
+  color: var(--cream-100);
+  border-radius: var(--radius-card);
+  padding: 1.5rem;
+  margin-block-start: 0.5rem;
+}
+
+.hero h1 {
+  color: var(--cream-100);
+  font-size: 2.2rem;
+}
+
+.hero-logo {
+  width: 96px;
+  height: auto;
+  border-radius: 12px;
+}
+
+.hero-text {
+  color: var(--sand-500);
+  font-size: 1.05rem;
+  margin-block: 0 1.25rem;
+}
+
+.eyebrow-on-dark {
+  color: var(--sand-500);
+  margin-block-start: 0;
+}
+
+/* Cards */
+.cards,
+.status-grid {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  gap: 0.9rem;
+}
+
+.card {
+  background: var(--cream-50);
+  border: 1px solid var(--sand-300);
+  border-radius: var(--radius-card);
+  padding: 1.1rem 1.25rem;
+}
+
+.status-grid .card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  font-weight: 500;
+}
+
+.card-title {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: 1.35rem;
+  color: var(--green-900);
+  text-decoration: none;
+}
+
+.card-title:hover {
+  color: var(--green-600);
+}
+
+.card p {
+  margin: 0.35rem 0 0;
+  color: var(--muted-600);
+}
+
+/* Badges always carry a word, never colour alone. */
+.badge {
+  display: inline-block;
+  margin-inline-start: 0.5rem;
+  padding: 0.1rem 0.65rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  background: var(--sand-300);
+  color: var(--green-900);
+}
+
+.badge-ok {
+  background: var(--green-100);
+  color: var(--green-700);
+}
+
+.badge-wait {
+  background: var(--sand-300);
+  color: var(--muted-600);
+}
+
+.badge-bad {
+  background: #f6dcd9;
+  color: var(--red-600);
+}
+
+.prose {
+  white-space: pre-wrap;
+}
+
+/* Buttons: pill-shaped. Primary is green with cream text, secondary is outlined. */
+.button,
+button.button {
+  display: inline-block;
+  border: 2px solid var(--green-700);
+  border-radius: 999px;
+  padding: 0.55rem 1.3rem;
+  background: var(--green-700);
+  color: var(--cream-100);
+  font: inherit;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.button:hover {
+  background: var(--green-600);
+  border-color: var(--green-600);
+}
+
+.button.secondary {
+  background: transparent;
+  color: var(--green-700);
+}
+
+.button.secondary:hover {
+  background: var(--green-100);
+}
+
+.button.danger {
+  background: var(--red-600);
+  border-color: var(--red-600);
+}
+
+.button-light {
+  background: var(--cream-100);
+  border-color: var(--cream-100);
+  color: var(--green-900);
+}
+
+.button-light:hover {
+  background: var(--cream-50);
+  border-color: var(--cream-50);
+}
+
+.button:disabled {
+  opacity: 0.6;
+}
+
+.link-button {
+  background: none;
+  border: 0;
+  color: var(--green-700);
+  font: inherit;
+  cursor: pointer;
+}
+
+.actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-block-start: 1.25rem;
+  flex-wrap: wrap;
+}
+
+/* Forms */
+.form {
+  display: grid;
+  gap: 1rem;
+  max-width: 600px;
+  background: var(--cream-50);
+  border: 1px solid var(--sand-300);
+  border-radius: var(--radius-card);
+  padding: 1.25rem;
+}
+
+.form label {
+  display: grid;
+  gap: 0.3rem;
+  font-weight: 600;
+}
+
+.form label.check {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.form .row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+input,
+select,
+textarea {
+  font: inherit;
+  font-weight: 400;
+  padding: 0.5rem 0.7rem;
+  border: 1px solid var(--sand-300);
+  border-radius: var(--radius-input);
+  background: #fff;
+  color: var(--green-900);
+  width: 100%;
+}
+
+label.inline {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-block: 0.5rem;
+  font-weight: 500;
+}
+
+label.inline select,
+.switcher select,
+.form label.check input {
+  width: auto;
+}
+
+/* Notes */
+.note {
+  border-radius: var(--radius-input);
+  padding: 0.7rem 1rem;
+  margin-block: 0.75rem;
+}
+
+.note p {
+  margin: 0;
+}
+
+.note-error {
+  background: #f6dcd9;
+  color: var(--red-600);
+  border: 1px solid #ebbbb6;
+}
+
+@media (min-width: 720px) {
+  .cards,
+  .status-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .hero {
+    grid-template-columns: auto 1fr;
+    padding: 2rem 2.25rem;
+  }
+
+  .hero-logo {
+    width: 120px;
+  }
+
+  h1 {
+    font-size: 2.4rem;
+  }
+
+  .hero h1 {
+    font-size: 2.8rem;
+  }
+}
+
+/* Credits, levels and permits */
+.note-ok {
+  background: var(--green-100);
+  color: var(--green-700);
+  border: 1px solid #c3d8c8;
+}
+
+.note-locked {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  background: var(--cream-50);
+  border: 1px solid var(--sand-300);
+}
+
+.lock-key {
+  height: 40px;
+  width: auto;
+}
+
+.hero-compact {
+  margin-block-end: 1rem;
+}
+
+/* Big numbers on dashboards use the heading serif. */
+.big-number {
+  font-family: var(--font-heading);
+  font-size: 4rem;
+  line-height: 1;
+  margin: 0.25rem 0;
+}
+
+.progress {
+  block-size: 12px;
+  border-radius: 999px;
+  background: var(--green-900);
+  overflow: hidden;
+}
+
+.progress span {
+  display: block;
+  block-size: 100%;
+  background: var(--cream-100);
+  border-radius: 999px;
+}
+
+.missing {
+  margin: 0.75rem 0 0;
+  padding-inline-start: 1.1rem;
+  color: var(--sand-500);
+}
+
+.ledger {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  gap: 0.6rem;
+}
+
+.ledger .card {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  padding: 0.75rem 1rem;
+}
+
+.amount {
+  font-family: var(--font-heading);
+  font-size: 1.6rem;
+  min-inline-size: 3.2rem;
+  text-align: center;
+}
+
+.amount.plus {
+  color: var(--green-700);
+}
+
+.amount.minus {
+  color: var(--red-600);
+}
+
+.small {
+  font-size: 0.85rem;
+}
+
+label.reason {
+  display: grid;
+  gap: 0.3rem;
+  margin-block-start: 0.75rem;
+  font-weight: 500;
+}
+
+.card .row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+  margin-block-start: 0.75rem;
+}
+
+.card .row label {
+  display: grid;
+  gap: 0.3rem;
+  font-weight: 500;
+}
+
+.cards.cards-single {
+  grid-template-columns: 1fr;
+}
+
+.card.read {
+  opacity: 0.7;
+}
+
+.note-text {
+  color: var(--green-900);
+  font-weight: 500;
+}
+
+/* Projects */
+.big-price {
+  font-family: var(--font-heading);
+  font-size: 2rem;
+  color: var(--green-700);
+  margin: 0.5rem 0 0;
+}
+
+.two-col {
+  display: grid;
+  gap: 1rem;
+  margin-block: 1rem;
+}
+
+.action-card {
+  margin-block: 1rem;
+  border-color: var(--green-600);
+}
+
+.row.three {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 0.75rem;
+}
+
+.row.three label,
+.rate label {
+  display: grid;
+  gap: 0.3rem;
+  font-weight: 500;
+}
+
+label.check {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-block: 0.5rem;
+}
+
+label.check input {
+  width: auto;
+}
+
+.plain {
+  list-style: none;
+  padding: 0;
+  margin: 0.25rem 0;
+  display: grid;
+  gap: 0.4rem;
+}
+
+.timeline {
+  margin: 0;
+  padding-inline-start: 1.2rem;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.timeline p,
+.messages p {
+  margin: 0.15rem 0 0;
+}
+
+.messages li {
+  border-block-end: 1px solid var(--sand-300);
+  padding-block-end: 0.5rem;
+}
+
+.send {
+  display: flex;
+  gap: 0.5rem;
+  margin-block-start: 0.75rem;
+}
+
+blockquote {
+  margin: 0.5rem 0 0;
+  padding-inline-start: 0.75rem;
+  border-inline-start: 3px solid var(--sand-300);
+  font-style: italic;
+  color: var(--muted-600);
+}
+
+.stars {
+  color: var(--green-700);
+}
+
+@media (min-width: 720px) {
+  .two-col {
+    grid-template-columns: 3fr 2fr;
+  }
+}
+
+/* Coding workspace and pull requests */
+.branch-bar {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.ide {
+  display: grid;
+  gap: 0.75rem;
+  margin-block: 1rem;
+}
+
+.file-tree {
+  background: var(--cream-50);
+  border: 1px solid var(--sand-300);
+  border-radius: var(--radius-input);
+  padding: 0.5rem;
+}
+
+.file-tree ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.file-tree .file {
+  display: block;
+  inline-size: 100%;
+  text-align: start;
+  background: none;
+  border: 0;
+  border-radius: 8px;
+  padding: 0.35rem 0.5rem;
+  font: inherit;
+  font-family: ui-monospace, Consolas, monospace;
+  font-size: 0.85rem;
+  color: var(--green-900);
+  cursor: pointer;
+  direction: ltr;
+}
+
+.file-tree .file.active {
+  background: var(--green-100);
+  font-weight: 600;
+}
+
+.tree-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin-block-start: 0.5rem;
+}
+
+.editor-pane {
+  border: 1px solid var(--sand-300);
+  border-radius: var(--radius-input);
+  overflow: hidden;
+  background: #fff;
+  min-inline-size: 0;
+}
+
+.commit-bar {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.commit-bar input {
+  flex: 1 1 260px;
+}
+
+.diff-file {
+  margin-block: 1rem;
+  padding: 0;
+  overflow: hidden;
+}
+
+.diff-head {
+  margin: 0;
+  padding: 0.6rem 1rem;
+  border-block-end: 1px solid var(--sand-300);
+  direction: ltr;
+  text-align: start;
+}
+
+.plus {
+  color: var(--green-700);
+}
+
+.minus {
+  color: var(--red-600);
+}
+
+table.diff {
+  inline-size: 100%;
+  border-collapse: collapse;
+  font-family: ui-monospace, Consolas, monospace;
+  font-size: 0.82rem;
+  display: block;
+  overflow-x: auto;
+}
+
+table.diff td {
+  padding: 0 0.5rem;
+  white-space: pre;
+  vertical-align: top;
+}
+
+table.diff td.ln {
+  color: var(--muted-600);
+  text-align: end;
+  user-select: none;
+  min-inline-size: 2.5rem;
+}
+
+table.diff td.code {
+  inline-size: 100%;
+  position: relative;
+}
+
+.diff-add {
+  background: #e4f4e6;
+}
+
+.diff-del {
+  background: #fbe5e2;
+}
+
+.sign {
+  display: inline-block;
+  inline-size: 1rem;
+  color: var(--muted-600);
+}
+
+.add-comment {
+  /* Always faintly visible: phones have no hover, and hidden buttons cannot be clicked. */
+  opacity: 0.25;
+  border: 0;
+  border-radius: 4px;
+  background: var(--green-700);
+  color: var(--cream-100);
+  font-size: 0.75rem;
+  margin-inline-end: 0.25rem;
+  cursor: pointer;
+}
+
+tr:hover .add-comment,
+.add-comment:focus-visible {
+  opacity: 1;
+}
+
+.diff-comment td {
+  background: var(--cream-50);
+  font-family: var(--font-body);
+  white-space: normal;
+  padding: 0.5rem 1rem;
+  border-block: 1px solid var(--sand-300);
+}
+
+@media (min-width: 720px) {
+  .ide {
+    grid-template-columns: 220px 1fr;
+  }
+}
+
+.add-comment-space {
+  display: inline-block;
+  inline-size: 1.15rem;
+}
