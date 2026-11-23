@@ -81,15 +81,27 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
+      # The Claude API key lives only in GitHub secrets. When it is set, it is
+      # copied into each Container App as a secret; when it is not, the AI
+      # features run on their offline rules (ADR-6).
       - name: Point both Container Apps at this commit's images
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         run: |
           owner="${GITHUB_REPOSITORY_OWNER,,}"
           for service in learning projects; do
+            app="${PREFIX}-${service}"
+            vars=("GIT_SHA=${GITHUB_SHA}")
+            if [ -n "$ANTHROPIC_API_KEY" ]; then
+              az containerapp secret set -n "$app" -g "$RESOURCE_GROUP" \
+                --secrets "anthropic-api-key=${ANTHROPIC_API_KEY}" --output none
+              vars+=("ANTHROPIC_API_KEY=secretref:anthropic-api-key")
+            fi
             az containerapp update \
-              --name "${PREFIX}-${service}" \
+              --name "$app" \
               --resource-group "$RESOURCE_GROUP" \
               --image "${REGISTRY}/${owner}/jiwar-${service}:${GITHUB_SHA}" \
-              --set-env-vars "GIT_SHA=${GITHUB_SHA}" \
+              --set-env-vars "${vars[@]}" \
               --output none
           done
 

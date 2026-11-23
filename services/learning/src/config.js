@@ -8,5 +8,7 @@ export function loadConfig(env = process.env) {
     databaseUrl: env.DATABASE_URL || undefined,
     // Shared key for calls between the two services (X-Internal-Key).
     internalApiKey: env.INTERNAL_API_KEY || undefined,
+    // Optional: with a key the AI features call Claude; without one they use offline rules.
+    anthropicApiKey: env.ANTHROPIC_API_KEY || undefined,
   };
 }

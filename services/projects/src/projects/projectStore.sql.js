@@ -186,6 +186,18 @@ export function createSqlProjectStore(db) {
       }));
     },
 
+    // For the matching model: the trainee's average client rating and current workload.
+    async traineeStats(traineeId) {
+      const row = await one(
+        `SELECT
+           AVG(CASE WHEN status = 'approved' AND rating IS NOT NULL THEN CAST(rating AS FLOAT) END) AS avg_rating,
+           SUM(CASE WHEN status IN ('in_progress', 'in_review') THEN 1 ELSE 0 END) AS active
+         FROM projects WHERE trainee_id = @traineeId`,
+        { traineeId },
+      );
+      return { avgRating: row?.avg_rating ?? 0, activeProjects: row?.active ?? 0 };
+    },
+
     async addPayout(p) {
       await db.query(
         `INSERT INTO payouts (project_id, trainee_id, amount_jd, jiwar_share_jd)

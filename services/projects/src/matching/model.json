@@ -1,0 +1,16 @@
+{
+  "version": "matching-v1",
+  "features": ["level_margin", "credits", "projects_completed", "avg_rating", "active_projects", "preferred"],
+  "mean": [1.0020833333, 1.1499226706, 1.9875, 3.2128557604, 1.5095833333, 0.145],
+  "std": [0.817768708, 0.495529236, 1.4206255958, 1.4855412617, 1.1146336437, 0.3521008378],
+  "weights": [1.1344051675, 0.6098413847, 0.1921416023, 0.9442603941, -1.6494966126, 0.2733675941],
+  "intercept": -0.7285248251,
+  "metrics": {
+    "auc": 0.9081,
+    "accuracy": 0.82,
+    "n_train": 2400,
+    "n_test": 600,
+    "positive_rate": 0.408
+  },
+  "trained_on": "synthetic data from ml/train.py, seed 42, 3000 samples"
+}

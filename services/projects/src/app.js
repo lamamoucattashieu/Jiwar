@@ -9,10 +9,11 @@ import { createMockPaymentProvider } from './payments/mockPaymentProvider.js';
 import { EVENTS, createProjectService } from './projects/projectService.js';
 import { createMemoryProjectStore } from './projects/projectStore.memory.js';
 import { projectRoutes } from './projects/projectRoutes.js';
+import { createAi, providerFromConfig } from './ai/aiClient.js';
 
 // deps.db: the executor from db/sql.js, or undefined when running without a database.
 // deps.repos.projects, deps.learning, deps.payments: adapters, so tests can swap them.
-export function createApp(config, { log, db, repos = {}, learning, payments } = {}) {
+export function createApp(config, { log, db, repos = {}, learning, payments, ai } = {}) {
   const app = express();
   app.disable('x-powered-by');
   app.use(requestLogger(log));
@@ -43,13 +44,17 @@ export function createApp(config, { log, db, repos = {}, learning, payments } = 
   });
 
   const store = repos.projects ?? createMemoryProjectStore();
+  // Claude with ANTHROPIC_API_KEY, offline rules without it (ADR-6).
+  const aiClient = ai ?? createAi({ provider: providerFromConfig(config), log });
   const learningClient =
     learning ?? createLearningClient({ baseUrl: config.learningUrl, internalKey: config.internalApiKey });
   const service = createProjectService({
     store,
     learning: learningClient,
     payments: payments ?? createMockPaymentProvider(),
+    ai: aiClient,
   });
+  app.get('/ai/status', (req, res) => res.json({ mode: aiClient.mode, matchingModel: service.modelInfo() }));
   // An approved project becomes credits in the learning service, retried until it gets there.
   const outbox = createOutboxDispatcher({
     store,

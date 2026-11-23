@@ -16,6 +16,10 @@ export function projectRoutes(service, outbox) {
     res.json(await service.portfolio(req.params.traineeId)),
   );
 
+  router.post('/ai/brief', company, async (req, res) => {
+    res.json(await service.suggestBrief(req.user, req.body));
+  });
+
   router.post('/projects', company, async (req, res) => {
     res.status(201).json(await service.request(req.user, req.body));
   });

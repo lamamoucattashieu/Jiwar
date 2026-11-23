@@ -6,6 +6,8 @@ import { DEMO_USERS, hasRole } from '../http/auth.js';
 import { parse } from '../http/validate.js';
 import { splitPayout } from '../payments/money.js';
 import { allowedActions, nextStatus, relationsOf } from './projectRules.js';
+import { MODEL_INFO, featuresFor, matchScore } from '../matching/matchScore.js';
+import { PACK_CODES, briefInput, briefTask } from '../ai/briefToQuote.js';
 import {
   assignInput,
   idParam,
@@ -33,7 +35,7 @@ function eligibilityProblems(e, levelRequired) {
   return problems;
 }
 
-export function createProjectService({ store, learning, payments }) {
+export function createProjectService({ store, learning, payments, ai }) {
   async function load(user, rawId) {
     const project = await store.findProject(parse(idParam, rawId));
     if (!project) throw notFound('Project not found');
@@ -148,16 +150,32 @@ export function createProjectService({ store, learning, payments }) {
       if (!hasRole(user, 'admin')) throw forbidden('Only admins assign projects');
       const levelRequired = project.levelRequired ?? 1;
       const all = await Promise.all(TRAINEES.map((t) => learning.eligibility(t.id)));
-      return all.map((e) => {
-        const problems = eligibilityProblems(e, levelRequired);
-        return {
-          ...e,
-          eligible: problems.length === 0,
-          problems,
-          preferred: e.traineeId === project.preferredTraineeId,
-        };
-      });
+      const ranked = await Promise.all(
+        all.map(async (e) => {
+          const problems = eligibilityProblems(e, levelRequired);
+          const preferred = e.traineeId === project.preferredTraineeId;
+          const stats = await store.traineeStats(e.traineeId);
+          // Story #24: the trained model's likelihood of a good delivery, as a 0..100 score.
+          const score = Math.round(
+            100 * matchScore(featuresFor({ eligibility: e, stats, levelRequired, preferred })),
+          );
+          return { ...e, ...stats, eligible: problems.length === 0, problems, preferred, score };
+        }),
+      );
+      // Eligible trainees first, best match first. The admin still chooses.
+      return ranked.sort((a, b) => Number(b.eligible) - Number(a.eligible) || b.score - a.score);
     },
+
+    /** Story #23: the business's own words turned into a draft brief and a suggested pack. */
+    async suggestBrief(user, body) {
+      if (!hasRole(user, 'company')) throw forbidden('Only businesses request projects');
+      const { description } = parse(briefInput, body);
+      const packs = await store.listPacks();
+      const draft = await ai.run(briefTask, { description, packs }, user.id);
+      return { ...draft, packCode: PACK_CODES.includes(draft.packCode) ? draft.packCode : null };
+    },
+
+    modelInfo: () => MODEL_INFO,
 
     async assign(user, rawId, body) {
       const { traineeId } = parse(assignInput, body);

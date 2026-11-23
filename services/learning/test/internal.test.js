@@ -38,6 +38,8 @@ test('eligibility reports level, permit validity and paused, nothing more', asyn
     level: 1,
     permitValid: true,
     projectsPaused: false,
+    credits: 0,
+    projectsCompleted: 0,
   });
   const fresh = (await call(app, 'get', '/internal/trainees/trainee-mariam/eligibility')).body;
   assert.deepEqual([fresh.level, fresh.permitValid], [0, false]);

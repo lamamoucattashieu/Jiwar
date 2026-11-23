@@ -12,11 +12,18 @@ import { createEventHandlers, createOutboxDispatcher } from './credits/events.js
 import { creditRoutes } from './credits/creditRoutes.js';
 import { internalRoutes } from './credits/internalRoutes.js';
 import { requireInternalKey } from './http/internalKey.js';
+import { createWorkspaceService } from './workspace/workspaceService.js';
+import { createMemoryWorkspaceStore } from './workspace/workspaceStore.memory.js';
+import { workspaceRoutes } from './workspace/workspaceRoutes.js';
+import { createAi, providerFromConfig } from './ai/aiClient.js';
+import { createTutorService } from './ai/tutor.js';
+import { createMemoryNoteRepository } from './ai/noteRepository.js';
 
 // deps.db: the executor from db/sql.js, or undefined when running without a database.
 // deps.repos: repositories, so tests and local runs can swap SQL for memory.
 // deps.today: returns today's date (YYYY-MM-DD); tests pass a fixed day.
-export function createApp(config, { log, db, repos = {}, today } = {}) {
+// deps.ai: the AI client (createAi); defaults to Claude with a key, offline rules without.
+export function createApp(config, { log, db, repos = {}, today, ai } = {}) {
   const app = express();
   app.disable('x-powered-by');
   app.use(requestLogger(log));
@@ -61,6 +68,26 @@ export function createApp(config, { log, db, repos = {}, today } = {}) {
   // server.js also drains the outbox on startup and on a timer, for events whose
   // first delivery failed.
   app.locals.outbox = outbox;
+
+  const aiClient = ai ?? createAi({ provider: providerFromConfig(config), log });
+  app.get('/ai/status', (req, res) => res.json({ mode: aiClient.mode }));
+
+  const workspace = createWorkspaceService({
+    store: repos.workspace ?? createMemoryWorkspaceStore(),
+    courses: courseRepo,
+    credits,
+    ai: aiClient,
+  });
+  app.use(workspaceRoutes(workspace));
+
+  const tutor = createTutorService({
+    notes: repos.notes ?? createMemoryNoteRepository(),
+    courses: courseRepo,
+    ai: aiClient,
+  });
+  app.post('/courses/:id/tutor', requireRole('trainee', 'instructor', 'admin'), async (req, res) => {
+    res.json(await tutor.ask(req.user, req.params.id, req.body));
+  });
 
   app.use(notFoundHandler);
   app.use(errorHandler(log));
