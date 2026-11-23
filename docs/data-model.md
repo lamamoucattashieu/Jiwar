@@ -87,6 +87,61 @@ erDiagram
 | `outbox` | `003` | Events written in the same transaction as the change, delivered by the dispatcher (ADR-1). |
 | `schema_migrations` | created by the migration runner | One row per applied migration, with its checksum. |
 
+### Coding workspace (migration `006_code_workspace.sql`)
+
+```mermaid
+erDiagram
+    courses ||--o{ code_repos : "one per trainee"
+    code_repos ||--o{ code_commits : contains
+    code_commits ||--o{ code_files : "snapshot of"
+    code_commits ||--o| code_commits : "parent"
+    code_repos ||--o{ code_branches : has
+    code_branches }o--|| code_commits : "head"
+    code_repos ||--o{ pull_requests : has
+    pull_requests ||--o{ review_comments : has
+    code_repos {
+        INT id PK
+        INT course_id FK
+        NVARCHAR(50) trainee_id "unique with course_id"
+    }
+    code_commits {
+        INT id PK
+        INT repo_id FK
+        INT parent_id FK "NULL for the first commit"
+        NVARCHAR(500) message
+        NVARCHAR(50) author_id
+    }
+    code_files {
+        INT commit_id PK
+        NVARCHAR(120) path PK
+        NVARCHAR(MAX) content
+    }
+    code_branches {
+        INT id PK
+        INT repo_id FK
+        NVARCHAR(50) name "unique per repo; main is protected in code"
+        INT head_commit_id FK
+    }
+    pull_requests {
+        INT id PK
+        INT repo_id FK
+        NVARCHAR(50) source_branch
+        NVARCHAR(50) target_branch "main"
+        NVARCHAR(20) status "open | changes_requested | merged"
+        INT merged_commit_id FK
+        INT base_commit_id FK "main before the merge"
+    }
+    review_comments {
+        INT id PK
+        INT pull_id FK
+        NVARCHAR(120) path "NULL = on the whole pull request"
+        INT line "line in the new code"
+        NVARCHAR(2000) body
+    }
+```
+
+Each commit stores a full snapshot of its files, so reading any version is one query and a diff compares two snapshots (`codeDiff.js`). History follows `parent_id` with a recursive query. A filtered unique index allows one open pull request per branch.
+
 Demo data for credits (`004_seed_demo_credits.sql`): Ahmad is Level 1 (30 credits, Web basics, valid permit), Mariam has 15 credits and a pending permit, and Yousef has a React result waiting for verification and a permit that expires within 30 days.
 
 ## projects database

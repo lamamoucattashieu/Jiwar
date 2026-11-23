@@ -12,6 +12,9 @@ import { createEventHandlers, createOutboxDispatcher } from './credits/events.js
 import { creditRoutes } from './credits/creditRoutes.js';
 import { internalRoutes } from './credits/internalRoutes.js';
 import { requireInternalKey } from './http/internalKey.js';
+import { createWorkspaceService } from './workspace/workspaceService.js';
+import { createMemoryWorkspaceStore } from './workspace/workspaceStore.memory.js';
+import { workspaceRoutes } from './workspace/workspaceRoutes.js';
 
 // deps.db: the executor from db/sql.js, or undefined when running without a database.
 // deps.repos: repositories, so tests and local runs can swap SQL for memory.
@@ -61,6 +64,13 @@ export function createApp(config, { log, db, repos = {}, today } = {}) {
   // server.js also drains the outbox on startup and on a timer, for events whose
   // first delivery failed.
   app.locals.outbox = outbox;
+
+  const workspace = createWorkspaceService({
+    store: repos.workspace ?? createMemoryWorkspaceStore(),
+    courses: courseRepo,
+    credits,
+  });
+  app.use(workspaceRoutes(workspace));
 
   app.use(notFoundHandler);
   app.use(errorHandler(log));

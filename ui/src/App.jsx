@@ -1,3 +1,4 @@
+import { Suspense, lazy } from 'react';
 import { BrowserRouter, NavLink, Route, Routes } from 'react-router-dom';
 import { LanguageProvider, useLanguage } from './i18n.jsx';
 import { SessionProvider, useSession } from './session.jsx';
@@ -14,6 +15,10 @@ import ProjectRequest from './pages/ProjectRequest.jsx';
 import ProjectsList from './pages/ProjectsList.jsx';
 import ProjectDetail from './pages/ProjectDetail.jsx';
 import Showcase, { Portfolio } from './pages/Showcase.jsx';
+import PullRequest, { Reviews } from './pages/PullRequest.jsx';
+
+// The workspace loads the Monaco editor (several MB), so it is fetched only when opened.
+const Workspace = lazy(() => import('./pages/Workspace.jsx'));
 
 // Navigation per role. Each feature adds its links here with the roles that see them.
 const NAV = [
@@ -23,6 +28,7 @@ const NAV = [
   { to: '/packs', key: 'navPacks', roles: ['company'] },
   { to: '/projects', key: 'navProjects', roles: ['company', 'trainee', 'admin'] },
   { to: '/teach', key: 'navTeach', roles: ['instructor'] },
+  { to: '/reviews', key: 'navReviews', roles: ['instructor', 'admin'] },
   { to: '/progress', key: 'navProgress', roles: ['trainee'] },
   { to: '/admin/verification', key: 'navVerification', roles: ['admin'] },
   { to: '/admin/permits', key: 'navPermits', roles: ['admin'] },
@@ -95,6 +101,16 @@ function Layout() {
           <Route path="/projects" element={<ProjectsList />} />
           <Route path="/projects/new" element={<ProjectRequest />} />
           <Route path="/projects/:id" element={<ProjectDetail />} />
+          <Route
+            path="/workspace/:repoId"
+            element={
+              <Suspense fallback={<p className="muted">…</p>}>
+                <Workspace />
+              </Suspense>
+            }
+          />
+          <Route path="/pulls/:id" element={<PullRequest />} />
+          <Route path="/reviews" element={<Reviews />} />
         </Routes>
       </main>
     </>
