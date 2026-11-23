@@ -3,10 +3,16 @@ import cors from 'cors';
 import { requestLogger } from './requestLogger.js';
 import { identify, requireRole, DEMO_USERS } from './http/auth.js';
 import { errorHandler, notFoundHandler } from './http/errors.js';
+import { createLearningClient } from './learningClient.js';
+import { createOutboxDispatcher } from './outbox.js';
+import { createMockPaymentProvider } from './payments/mockPaymentProvider.js';
+import { EVENTS, createProjectService } from './projects/projectService.js';
+import { createMemoryProjectStore } from './projects/projectStore.memory.js';
+import { projectRoutes } from './projects/projectRoutes.js';
 
 // deps.db: the executor from db/sql.js, or undefined when running without a database.
-// The project features (packs, requests, workflow, payments) are added as modules here.
-export function createApp(config, { log, db } = {}) {
+// deps.repos.projects, deps.learning, deps.payments: adapters, so tests can swap them.
+export function createApp(config, { log, db, repos = {}, learning, payments } = {}) {
   const app = express();
   app.disable('x-powered-by');
   app.use(requestLogger(log));
@@ -35,6 +41,24 @@ export function createApp(config, { log, db } = {}) {
   app.get('/me', requireRole('trainee', 'instructor', 'company', 'admin'), (req, res) => {
     res.json(req.user);
   });
+
+  const store = repos.projects ?? createMemoryProjectStore();
+  const learningClient =
+    learning ?? createLearningClient({ baseUrl: config.learningUrl, internalKey: config.internalApiKey });
+  const service = createProjectService({
+    store,
+    learning: learningClient,
+    payments: payments ?? createMockPaymentProvider(),
+  });
+  // An approved project becomes credits in the learning service, retried until it gets there.
+  const outbox = createOutboxDispatcher({
+    store,
+    handlers: { [EVENTS.projectApproved]: (p) => learningClient.awardProjectCredit(p) },
+    log,
+  });
+  app.use(projectRoutes(service, outbox));
+  // server.js retries undelivered events on startup and on a timer.
+  app.locals.outbox = outbox;
 
   app.use(notFoundHandler);
   app.use(errorHandler(log));

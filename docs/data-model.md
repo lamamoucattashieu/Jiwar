@@ -91,6 +91,83 @@ Demo data for credits (`004_seed_demo_credits.sql`): Ahmad is Level 1 (30 credit
 
 ## projects database
 
+```mermaid
+erDiagram
+    packs ||--o{ projects : "requested as"
+    projects ||--o{ project_events : "moves through"
+    projects ||--o{ messages : "discussed in"
+    projects ||--o{ invoices : "paid by"
+    projects ||--o| payouts : "pays the trainee"
+    packs {
+        NVARCHAR(30) code PK "website | whatsapp-bot | ai-assistant"
+        NVARCHAR(100) name
+        INT delivery_days
+        DECIMAL setup_fee_jd
+        DECIMAL price_jd
+        INT level_required "1 to 3"
+    }
+    projects {
+        INT id PK
+        NVARCHAR(50) company_id "demo user id"
+        NVARCHAR(30) pack_code FK "NULL = custom request"
+        NVARCHAR(200) title
+        NVARCHAR(2000) goals
+        DATE deadline
+        NVARCHAR(20) status "requested | quoted | accepted | in_progress | in_review | approved | cancelled"
+        INT level_required
+        DECIMAL setup_fee_jd
+        DECIMAL price_jd
+        NVARCHAR(50) preferred_trainee_id "a wish; the admin decides"
+        NVARCHAR(50) trainee_id "learning demo user id"
+        INT revisions_used "max_revisions default 2"
+        INT rating "1 to 5"
+        NVARCHAR(1000) testimonial
+        BIT testimonial_public "company consent"
+    }
+    project_events {
+        INT id PK
+        INT project_id FK
+        NVARCHAR(30) action
+        NVARCHAR(20) from_status
+        NVARCHAR(20) to_status
+        NVARCHAR(50) actor_id
+    }
+    messages {
+        INT id PK
+        INT project_id FK
+        NVARCHAR(50) author_id
+        NVARCHAR(2000) body
+    }
+    invoices {
+        INT id PK
+        INT project_id FK
+        NVARCHAR(20) kind "setup_fee | project_price, unique per project"
+        DECIMAL amount_jd
+        NVARCHAR(100) payment_ref "from the mock payment provider"
+    }
+    payouts {
+        INT id PK
+        INT project_id FK "unique"
+        NVARCHAR(50) trainee_id
+        DECIMAL amount_jd "80% of the price"
+        DECIMAL jiwar_share_jd "20%"
+    }
+    outbox {
+        BIGINT id PK
+        NVARCHAR(60) event_type "project.approved"
+        NVARCHAR(2000) payload "JSON"
+        DATETIME2 processed_at
+        INT attempts "given up after 8"
+    }
+```
+
 | Table | Migration | Notes |
 |---|---|---|
-| `schema_migrations` | created by the migration runner | No feature tables yet. |
+| `packs` | `001_create_projects.sql`, rows in `002` | Fixed prices are placeholders from the proposal. |
+| `projects` | `001`, demo rows in `002` | The status follows the state machine in `projectRules.js`; every change is also written to `project_events`. |
+| `project_events`, `messages` | `001` | The timeline and the thread on the project page. |
+| `invoices`, `payouts` | `001` | Money in from companies (mock payments) and out to trainees. Unique keys stop a project being charged or paid out twice. |
+| `outbox` | `001` | `project.approved` events, delivered to the learning service's `POST /internal/project-credits` and retried while it is down. |
+| `schema_migrations` | created by the migration runner | One row per applied migration, with its checksum. |
+
+Across the two databases: `credit_ledger.source_id` in learning (with `source_type = 'project'`) holds `projects.id`, and a unique index there (`005_project_credits.sql`) means a retried event never adds the credits twice. Project 1 (approved, Ahmad) and its 5 credits are seeded in both databases.

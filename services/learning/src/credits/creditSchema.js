@@ -30,5 +30,11 @@ export const permitInput = z.object({
 
 export const pausedInput = z.object({ paused: z.boolean() });
 
+export const projectCreditInput = z.object({
+  traineeId: demoId,
+  projectId: z.number().int().positive(),
+  title: z.string().trim().min(1).max(200),
+});
+
 export const idParam = z.coerce.number().int().positive();
 export const traineeParam = demoId;

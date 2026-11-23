@@ -21,6 +21,9 @@ set -euo pipefail
 : "${LEARNING_DB_PASSWORD:?set LEARNING_DB_PASSWORD}"
 : "${PROJECTS_DB_PASSWORD:?set PROJECTS_DB_PASSWORD}"
 RESOURCE_GROUP="${RESOURCE_GROUP:-rg-$PREFIX}"
+# The services call each other with this key. Export INTERNAL_API_KEY to keep the
+# same one on a re-run; otherwise a new random key is generated for both apps.
+INTERNAL_API_KEY="${INTERNAL_API_KEY:-$(openssl rand -hex 32)}"
 SQL_ADMIN_LOGIN="${SQL_ADMIN_LOGIN:-jiwaradmin}"
 here="$(cd "$(dirname "$0")" && pwd)"
 
@@ -40,6 +43,7 @@ az deployment group create \
   sqlAdminPassword="$SQL_ADMIN_PASSWORD" \
   learningDbPassword="$LEARNING_DB_PASSWORD" \
   projectsDbPassword="$PROJECTS_DB_PASSWORD" \
+  internalApiKey="$INTERNAL_API_KEY" \
   learningImage="$(current_image learning)" \
   projectsImage="$(current_image projects)" \
   --output none

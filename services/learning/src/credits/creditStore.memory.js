@@ -67,6 +67,10 @@ export function createMemoryCreditStore() {
     async creditTotal(traineeId) {
       return state.ledger.filter((e) => e.traineeId === traineeId).reduce((sum, e) => sum + e.amount, 0);
     },
+    async findLedgerBySource(sourceType, sourceId) {
+      const e = state.ledger.find((x) => x.sourceType === sourceType && x.sourceId === sourceId);
+      return e ? copy(e) : null;
+    },
     async countProjectCredits(traineeId) {
       return state.ledger.filter((e) => e.traineeId === traineeId && e.sourceType === 'project').length;
     },

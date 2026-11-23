@@ -6,5 +6,8 @@ export function loadConfig(env = process.env) {
     corsOrigin: env.CORS_ORIGIN ?? 'http://localhost:8080',
     version: env.GIT_SHA ?? 'dev',
     databaseUrl: env.DATABASE_URL || undefined,
+    // Shared key for calls between the two services (X-Internal-Key).
+    internalApiKey: env.INTERNAL_API_KEY || undefined,
+    learningUrl: env.LEARNING_URL ?? 'http://localhost:3001',
   };
 }

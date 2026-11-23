@@ -11,6 +11,7 @@ import {
   idParam,
   pausedInput,
   permitInput,
+  projectCreditInput,
   rejectInput,
   resultInput,
   traineeParam,
@@ -24,6 +25,9 @@ export const EVENTS = Object.freeze({
 });
 
 const TRAINEES = DEMO_USERS.filter((u) => u.roles.includes('trainee'));
+
+// Credits for a completed client project (proposal: 5).
+export const PROJECT_CREDITS = 5;
 const todayUtc = () => new Date().toISOString().slice(0, 10);
 
 function requireTrainee(rawId) {
@@ -154,6 +158,49 @@ export function createCreditService({ store, courses, today = todayUtc }) {
         });
         await tx.enqueue(EVENTS.creditsChanged, { traineeId, amount, reason });
         return entry;
+      });
+    },
+
+    /**
+     * For the projects service (internal API): may this trainee take a project?
+     * Only what assignment needs: level, permit validity, paused. No permit dates or documents.
+     */
+    async eligibility(rawTraineeId) {
+      const traineeId = requireTrainee(rawTraineeId);
+      const profile = await store.getProfile(traineeId);
+      const permit = await store.getPermit(traineeId);
+      const trainee = TRAINEES.find((t) => t.id === traineeId);
+      return {
+        traineeId,
+        name: trainee.name,
+        level: profile?.level ?? 0,
+        permitValid: isPermitValid(permit, today()),
+        projectsPaused: profile?.projectsPaused ?? false,
+      };
+    },
+
+    /**
+     * For the projects service (internal API): an approved client project earns
+     * PROJECT_CREDITS. Safe to call twice for the same project (the projects
+     * outbox may retry): the second call returns the existing entry.
+     */
+    async awardProjectCredit(body) {
+      const { traineeId: rawId, projectId, title } = parse(projectCreditInput, body);
+      const traineeId = requireTrainee(rawId);
+      return store.transaction(async (tx) => {
+        const existing = await tx.findLedgerBySource('project', projectId);
+        if (existing) return { entry: existing, created: false };
+        const reason = `Completed client project: ${title}`;
+        const entry = await tx.appendLedger({
+          traineeId,
+          amount: PROJECT_CREDITS,
+          sourceType: 'project',
+          sourceId: projectId,
+          reason,
+          createdBy: 'projects-service',
+        });
+        await tx.enqueue(EVENTS.creditsChanged, { traineeId, amount: PROJECT_CREDITS, reason });
+        return { entry, created: true };
       });
     },
 
