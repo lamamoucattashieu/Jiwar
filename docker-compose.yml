@@ -42,6 +42,7 @@ services:
       PORT: 8000
       CORS_ORIGIN: http://localhost:8080
       DATABASE_URL: mssql://learning_user:${LEARNING_DB_PASSWORD}@sqlserver:1433/learning?encrypt=true&trustServerCertificate=true
+      INTERNAL_API_KEY: ${INTERNAL_API_KEY:?set it in .env}
     ports:
       - "3001:8000"
 
@@ -54,6 +55,7 @@ services:
       PORT: 8000
       CORS_ORIGIN: http://localhost:8080
       DATABASE_URL: mssql://projects_user:${PROJECTS_DB_PASSWORD}@sqlserver:1433/projects?encrypt=true&trustServerCertificate=true
+      INTERNAL_API_KEY: ${INTERNAL_API_KEY:?set it in .env}
       LEARNING_URL: http://learning:8000
     ports:
       - "3002:8000"

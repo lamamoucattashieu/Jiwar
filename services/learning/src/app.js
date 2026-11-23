@@ -10,6 +10,8 @@ import { createCreditService } from './credits/creditService.js';
 import { createMemoryCreditStore } from './credits/creditStore.memory.js';
 import { createEventHandlers, createOutboxDispatcher } from './credits/events.js';
 import { creditRoutes } from './credits/creditRoutes.js';
+import { internalRoutes } from './credits/internalRoutes.js';
+import { requireInternalKey } from './http/internalKey.js';
 
 // deps.db: the executor from db/sql.js, or undefined when running without a database.
 // deps.repos: repositories, so tests and local runs can swap SQL for memory.
@@ -55,6 +57,7 @@ export function createApp(config, { log, db, repos = {}, today } = {}) {
     log,
   });
   app.use(creditRoutes(credits, outbox));
+  app.use('/internal', requireInternalKey(config.internalApiKey), internalRoutes(credits, outbox));
   // server.js also drains the outbox on startup and on a timer, for events whose
   // first delivery failed.
   app.locals.outbox = outbox;

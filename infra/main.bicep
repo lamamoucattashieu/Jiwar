@@ -32,6 +32,10 @@ param learningDbPassword string
 @description('Password of projects_user, the contained user of the projects database.')
 param projectsDbPassword string
 
+@secure()
+@description('Shared key the two services use to call each other (X-Internal-Key).')
+param internalApiKey string
+
 @description('Images to run. The first setup uses a placeholder; CD replaces it on every merge to main.')
 param learningImage string = 'mcr.microsoft.com/k8se/quickstart:latest'
 param projectsImage string = 'mcr.microsoft.com/k8se/quickstart:latest'
@@ -153,6 +157,10 @@ resource apps 'Microsoft.App/containerApps@2024-03-01' = [
             name: 'database-url'
             value: 'mssql://${s.name}_user:${uriComponent(s.dbPassword)}@${sqlHost}:1433/${prefix}-${s.name}-db?encrypt=true'
           }
+          {
+            name: 'internal-api-key'
+            value: internalApiKey
+          }
         ]
       }
       template: {
@@ -169,6 +177,7 @@ resource apps 'Microsoft.App/containerApps@2024-03-01' = [
                 { name: 'PORT', value: '8000' }
                 { name: 'CORS_ORIGIN', value: uiOrigin }
                 { name: 'DATABASE_URL', secretRef: 'database-url' }
+                { name: 'INTERNAL_API_KEY', secretRef: 'internal-api-key' }
               ],
               s.name == 'projects' ? [{ name: 'LEARNING_URL', value: learningUrl }] : []
             )

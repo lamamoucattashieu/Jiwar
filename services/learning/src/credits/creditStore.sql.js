@@ -148,6 +148,13 @@ export function createSqlCreditStore(db) {
       );
       return row.total;
     },
+    async findLedgerBySource(sourceType, sourceId) {
+      const row = await one(
+        'SELECT * FROM credit_ledger WHERE source_type = @sourceType AND source_id = @sourceId',
+        { sourceType, sourceId },
+      );
+      return row && toEntry(row);
+    },
     async countProjectCredits(traineeId) {
       const row = await one(
         `SELECT COUNT(*) AS n FROM credit_ledger

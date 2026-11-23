@@ -585,3 +585,95 @@ label.reason {
   color: var(--green-900);
   font-weight: 500;
 }
+
+/* Projects */
+.big-price {
+  font-family: var(--font-heading);
+  font-size: 2rem;
+  color: var(--green-700);
+  margin: 0.5rem 0 0;
+}
+
+.two-col {
+  display: grid;
+  gap: 1rem;
+  margin-block: 1rem;
+}
+
+.action-card {
+  margin-block: 1rem;
+  border-color: var(--green-600);
+}
+
+.row.three {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 0.75rem;
+}
+
+.row.three label,
+.rate label {
+  display: grid;
+  gap: 0.3rem;
+  font-weight: 500;
+}
+
+label.check {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-block: 0.5rem;
+}
+
+label.check input {
+  width: auto;
+}
+
+.plain {
+  list-style: none;
+  padding: 0;
+  margin: 0.25rem 0;
+  display: grid;
+  gap: 0.4rem;
+}
+
+.timeline {
+  margin: 0;
+  padding-inline-start: 1.2rem;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.timeline p,
+.messages p {
+  margin: 0.15rem 0 0;
+}
+
+.messages li {
+  border-block-end: 1px solid var(--sand-300);
+  padding-block-end: 0.5rem;
+}
+
+.send {
+  display: flex;
+  gap: 0.5rem;
+  margin-block-start: 0.75rem;
+}
+
+blockquote {
+  margin: 0.5rem 0 0;
+  padding-inline-start: 0.75rem;
+  border-inline-start: 3px solid var(--sand-300);
+  font-style: italic;
+  color: var(--muted-600);
+}
+
+.stars {
+  color: var(--green-700);
+}
+
+@media (min-width: 720px) {
+  .two-col {
+    grid-template-columns: 3fr 2fr;
+  }
+}

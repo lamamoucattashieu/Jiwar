@@ -28,7 +28,7 @@
 
 - **Status:** Accepted, Sprint 0 (17 Nov 2026)
 - **Context:** User authentication is out of scope; a hard-coded demo user is enough.
-- **Decision:** The product uses a small set of seeded demo users (learners and businesses). The UI lets the presenter pick which demo user to act as.
+- **Decision:** The product uses a small set of seeded demo users (learners and businesses). The UI lets the presenter pick which demo user to act as. Calls between the two services (eligibility checks and project credits) use `/internal` endpoints that require a shared key in the `X-Internal-Key` header, stored as a Container Apps secret. Projects calls learning with a 3-second timeout and a circuit breaker, so a learning outage fails only the features that need it, with a clear message.
 - **Alternatives:** An optional API key, which protects write endpoints but does not help show both sides of the product in the demo; real authentication, which is out of scope.
 - **Consequences:** No passwords or sessions to store or secure. The live system is not fit for real users without adding authentication.
 

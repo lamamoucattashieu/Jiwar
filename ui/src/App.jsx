@@ -9,11 +9,19 @@ import Progress from './pages/Progress.jsx';
 import VerificationQueue from './pages/VerificationQueue.jsx';
 import Permits from './pages/Permits.jsx';
 import Notifications from './pages/Notifications.jsx';
+import Packs from './pages/Packs.jsx';
+import ProjectRequest from './pages/ProjectRequest.jsx';
+import ProjectsList from './pages/ProjectsList.jsx';
+import ProjectDetail from './pages/ProjectDetail.jsx';
+import Showcase, { Portfolio } from './pages/Showcase.jsx';
 
 // Navigation per role. Each feature adds its links here with the roles that see them.
 const NAV = [
   { to: '/', key: 'navHome', end: true },
   { to: '/courses', key: 'navCourses' },
+  { to: '/showcase', key: 'navShowcase' },
+  { to: '/packs', key: 'navPacks', roles: ['company'] },
+  { to: '/projects', key: 'navProjects', roles: ['company', 'trainee', 'admin'] },
   { to: '/teach', key: 'navTeach', roles: ['instructor'] },
   { to: '/progress', key: 'navProgress', roles: ['trainee'] },
   { to: '/admin/verification', key: 'navVerification', roles: ['admin'] },
@@ -81,6 +89,12 @@ function Layout() {
           <Route path="/admin/verification" element={<VerificationQueue />} />
           <Route path="/admin/permits" element={<Permits />} />
           <Route path="/notifications" element={<Notifications />} />
+          <Route path="/packs" element={<Packs />} />
+          <Route path="/showcase" element={<Showcase />} />
+          <Route path="/portfolio/:traineeId" element={<Portfolio />} />
+          <Route path="/projects" element={<ProjectsList />} />
+          <Route path="/projects/new" element={<ProjectRequest />} />
+          <Route path="/projects/:id" element={<ProjectDetail />} />
         </Routes>
       </main>
     </>
